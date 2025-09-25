@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-eslint",
+    "ms-vscode.vscode-json",
+    "ms-vscode.vscode-react",
+    "ms-vscode.vscode-react-native",
+    "dsznajder.es7-react-js-snippets"
+  ]
+}

@@ -1,0 +1,26 @@
+# Dependency directories
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Testing
+coverage/
+
+# Environment files
+.env*
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db

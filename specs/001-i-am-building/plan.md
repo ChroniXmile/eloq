@@ -5,7 +5,6 @@
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
 ## Execution Flow (/plan command scope)
-
 ```
 1. Load feature spec from Input path
    → If not found: ERROR "No feature spec at {path}"
@@ -28,36 +27,36 @@
 ```
 
 **IMPORTANT**: The /plan command STOPS at step 7. Phases 2-4 are executed by other commands:
-
 - Phase 2: /tasks command creates tasks.md
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-
-[Extract from feature spec: primary requirement + technical approach from research]
+Create a modern pool/billiards score tracking and ranking website with a sleek design using Next.js, shadcn/ui, and PostgreSQL. The site will feature a landing page with top 100 player rankings based on an Elo-like rating system, player information pages with detailed statistics and rating history, user dashboard, and tournaments page. All data will be mocked initially. The implementation will follow a responsive, mobile-first approach with accessibility compliance and incorporate the pool_elo.py rating algorithm.
 
 ## Technical Context
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: TypeScript (ES2017)  
+**Primary Dependencies**: Next.js 15, shadcn/ui, Tailwind CSS, React 19  
+**Storage**: PostgreSQL with mock data for players and rating system  
+**Testing**: Jest, React Testing Library  
+**Target Platform**: Web (responsive design for mobile and desktop)  
+**Project Type**: web  
+**Performance Goals**: Page load times under 200ms for static content, First Contentful Paint under 1.5s on 3G networks  
+**Constraints**: Use mock data for all information display, WCAG 2.1 AA compliance, Mobile-first responsive design, Implementation of Elo-like rating system for player rankings  
+**Scale/Scope**: 100 players, 4 main pages, single developer project
 
 ## Constitution Check
-
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [x] I. Library-First Approach: Components will be built as reusable libraries
+- [x] II. CLI Interface: Not applicable for this web UI feature
+- [x] III. Test-First (NON-NEGOTIABLE): TDD will be followed for all components
+- [x] IV. Integration Testing: Required for API endpoints and database interactions
+- [x] V. Simplicity: Following YAGNI principles with minimal dependencies
+- [x] VI. Accessibility and Responsive Design: WCAG 2.1 AA compliance and responsive design are requirements
 
 ## Project Structure
 
 ### Documentation (this feature)
-
 ```
 specs/[###-feature]/
 ├── plan.md              # This file (/plan command output)
@@ -69,7 +68,6 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-
 ```
 # Option 1: Single project (DEFAULT)
 src/
@@ -109,14 +107,12 @@ ios/ or android/
 **Structure Decision**: [DEFAULT to Option 1 unless Technical Context indicates web/mobile app]
 
 ## Phase 0: Outline & Research
-
 1. **Extract unknowns from Technical Context** above:
    - For each NEEDS CLARIFICATION → research task
    - For each dependency → best practices task
    - For each integration → patterns task
 
 2. **Generate and dispatch research agents**:
-
    ```
    For each unknown in Technical Context:
      Task: "Research {unknown} for {feature context}"
@@ -132,7 +128,6 @@ ios/ or android/
 **Output**: research.md with all NEEDS CLARIFICATION resolved
 
 ## Phase 1: Design & Contracts
-
 *Prerequisites: research.md complete*
 
 1. **Extract entities from feature spec** → `data-model.md`:
@@ -165,21 +160,18 @@ ios/ or android/
 **Output**: data-model.md, /contracts/*, failing tests, quickstart.md, agent-specific file
 
 ## Phase 2: Task Planning Approach
-
 *This section describes what the /tasks command will do - DO NOT execute during /plan*
 
 **Task Generation Strategy**:
-
 - Load `.specify/templates/tasks-template.md` as base
 - Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
 - Each contract → contract test task [P]
-- Each entity → model creation task [P]
+- Each entity → model creation task [P] 
 - Each user story → integration test task
 - Implementation tasks to make tests pass
 
 **Ordering Strategy**:
-
-- TDD order: Tests before implementation
+- TDD order: Tests before implementation 
 - Dependency order: Models before services before UI
 - Mark [P] for parallel execution (independent files)
 
@@ -188,15 +180,13 @@ ios/ or android/
 **IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
 
 ## Phase 3+: Future Implementation
-
 *These phases are beyond the scope of the /plan command*
 
-**Phase 3**: Task execution (/tasks command creates tasks.md)
-**Phase 4**: Implementation (execute tasks.md following constitutional principles)
+**Phase 3**: Task execution (/tasks command creates tasks.md)  
+**Phase 4**: Implementation (execute tasks.md following constitutional principles)  
 **Phase 5**: Validation (run tests, execute quickstart.md, performance validation)
 
 ## Complexity Tracking
-
 *Fill ONLY if Constitution Check has violations that must be justified*
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
@@ -204,24 +194,22 @@ ios/ or android/
 | [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
 | [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
 
-## Progress Tracking
 
+## Progress Tracking
 *This checklist is updated during execution flow*
 
 **Phase Status**:
-
-- [ ] Phase 0: Research complete (/plan command)
-- [ ] Phase 1: Design complete (/plan command)
-- [ ] Phase 2: Task planning complete (/plan command - describe approach only)
-- [ ] Phase 3: Tasks generated (/tasks command)
+- [x] Phase 0: Research complete (/plan command)
+- [x] Phase 1: Design complete (/plan command)
+- [x] Phase 2: Task planning complete (/plan command - describe approach only)
+- [x] Phase 3: Tasks generated (/tasks command)
 - [ ] Phase 4: Implementation complete
 - [ ] Phase 5: Validation passed
 
 **Gate Status**:
-
-- [ ] Initial Constitution Check: PASS
-- [ ] Post-Design Constitution Check: PASS
-- [ ] All NEEDS CLARIFICATION resolved
+- [x] Initial Constitution Check: PASS
+- [x] Post-Design Constitution Check: PASS
+- [x] All NEEDS CLARIFICATION resolved
 - [ ] Complexity deviations documented
 
 ---
