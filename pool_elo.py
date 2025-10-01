@@ -91,12 +91,42 @@ def load_seeds(path):
     df = pd.read_csv(path)
     for _, row in df.iterrows():
         name = str(row["player"])
-        seeds[name] = float(row["rating"])
-        m = row.get("matches", 0)
+        rating_val = row["rating"]
+        # Handle both scalar values and pandas Series from DataFrame iteration
         try:
-            m = int(m)
-        except Exception:
-            m = 0
+            # Try to convert directly first (handles most scalar cases)
+            rating_scalar = float(rating_val)  # type: ignore
+        except (TypeError, ValueError):
+            # If direct conversion fails, it might be a pandas Series
+            try:
+                # Extract scalar from Series using iloc[0]
+                if hasattr(rating_val, 'iloc'):
+                    rating_scalar = float(rating_val.iloc[0])
+                else:
+                    # Fallback for other types
+                    rating_scalar = 1500.0
+            except (AttributeError, IndexError, TypeError, ValueError):
+                # Final fallback for any conversion issues
+                rating_scalar = 1500.0
+        seeds[name] = rating_scalar if not pd.isna(rating_scalar) else 1500.0
+        m = row.get("matches", 0)
+        # Handle both scalar values and pandas Series from DataFrame iteration
+        try:
+            # Try to convert directly first (handles most scalar cases)
+            m_scalar = int(m)
+        except (TypeError, ValueError):
+            # If direct conversion fails, it might be a pandas Series
+            try:
+                # Extract scalar from Series using iloc[0]
+                if hasattr(m, 'iloc'):
+                    m_scalar = int(m.iloc[0])
+                else:
+                    # Fallback for other types
+                    m_scalar = 0
+            except (AttributeError, IndexError, TypeError, ValueError):
+                # Final fallback for any conversion issues
+                m_scalar = 0
+        m = m_scalar
         matches[name] = m
     return seeds, matches
 
@@ -142,8 +172,36 @@ def main():
         R_j = float(ratings[p_j])
         deltaR = R_i - R_j
 
-        r_i = int(row["racks_i"])
-        r_j = int(row["racks_j"])
+        # Extract scalar values to avoid pandas Series issues
+        r_i_val = row["racks_i"]
+        r_j_val = row["racks_j"]
+
+        # Handle r_i_val conversion
+        try:
+            r_i_scalar = int(r_i_val)  # type: ignore
+        except (TypeError, ValueError):
+            try:
+                if hasattr(r_i_val, 'iloc'):
+                    r_i_scalar = int(r_i_val.iloc[0])
+                else:
+                    r_i_scalar = 0
+            except (AttributeError, IndexError, TypeError, ValueError):
+                r_i_scalar = 0
+
+        # Handle r_j_val conversion
+        try:
+            r_j_scalar = int(r_j_val)  # type: ignore
+        except (TypeError, ValueError):
+            try:
+                if hasattr(r_j_val, 'iloc'):
+                    r_j_scalar = int(r_j_val.iloc[0])
+                else:
+                    r_j_scalar = 0
+            except (AttributeError, IndexError, TypeError, ValueError):
+                r_j_scalar = 0
+
+        r_i = r_i_scalar
+        r_j = r_j_scalar
         T = r_i + r_j
 
         balls_per_rack = row.get("balls_per_rack", float("nan"))

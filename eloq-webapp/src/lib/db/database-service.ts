@@ -6,12 +6,22 @@ import { Player } from '../../models/player';
 import { Match } from '../../models/match';
 import { Tournament } from '../../models/tournament';
 import { User } from '../../models/user';
+import { cache, generateCacheKey } from '../../lib/cache';
 
 /**
  * Get all players from the database
  * @returns Promise resolving to array of players
  */
 export async function getPlayers(): Promise<Player[]> {
+  // Check cache first
+  const cacheKey = generateCacheKey('players', []);
+  const cachedResult = cache.get<Player[]>(cacheKey);
+  
+  if (cachedResult) {
+    console.log('Returning cached players');
+    return cachedResult;
+  }
+
   try {
     const result = await query<Player>(`
       SELECT 
@@ -25,7 +35,7 @@ export async function getPlayers(): Promise<Player[]> {
     `);
     
     // Convert string fields to numbers where needed
-    return result.rows.map(player => ({
+    const players = result.rows.map(player => ({
       ...player,
       rating: typeof player.rating === 'string' ? parseFloat(player.rating) : player.rating,
       ranking: typeof player.ranking === 'string' ? parseInt(player.ranking, 10) : player.ranking,
@@ -36,6 +46,11 @@ export async function getPlayers(): Promise<Player[]> {
       highestBreak: typeof player.highestBreak === 'string' ? parseInt(player.highestBreak, 10) : player.highestBreak,
       matchesPlayed: typeof player.matchesPlayed === 'string' ? parseInt(player.matchesPlayed, 10) : player.matchesPlayed
     }));
+    
+    // Cache the result for 5 minutes
+    cache.set(cacheKey, players, 5 * 60 * 1000);
+    
+    return players;
   } catch (error) {
     console.error('Error fetching players from database:', error);
     throw new Error('Failed to fetch players from database');
@@ -48,6 +63,15 @@ export async function getPlayers(): Promise<Player[]> {
  * @returns Promise resolving to player or undefined if not found
  */
 export async function getPlayerById(id: string): Promise<Player | undefined> {
+  // Check cache first
+  const cacheKey = generateCacheKey('player', [id]);
+  const cachedResult = cache.get<Player>(cacheKey);
+  
+  if (cachedResult) {
+    console.log(`Returning cached player with ID: ${id}`);
+    return cachedResult;
+  }
+
   try {
     const result = await query<Player>(`
       SELECT 
@@ -61,13 +85,15 @@ export async function getPlayerById(id: string): Promise<Player | undefined> {
     `, [id]);
     
     if (result.rows.length === 0) {
+      // Cache the "not found" result to avoid repeated database queries
+      cache.set(cacheKey, null, 2 * 60 * 1000); // Cache not-found for 2 minutes
       return undefined;
     }
     
     const player = result.rows[0];
     
     // Convert string fields to numbers where needed
-    return {
+    const playerResult = {
       ...player,
       rating: typeof player.rating === 'string' ? parseFloat(player.rating) : player.rating,
       ranking: typeof player.ranking === 'string' ? parseInt(player.ranking, 10) : player.ranking,
@@ -78,6 +104,11 @@ export async function getPlayerById(id: string): Promise<Player | undefined> {
       highestBreak: typeof player.highestBreak === 'string' ? parseInt(player.highestBreak, 10) : player.highestBreak,
       matchesPlayed: typeof player.matchesPlayed === 'string' ? parseInt(player.matchesPlayed, 10) : player.matchesPlayed
     };
+    
+    // Cache the result for 10 minutes
+    cache.set(cacheKey, playerResult, 10 * 60 * 1000);
+    
+    return playerResult;
   } catch (error) {
     console.error(`Error fetching player with ID ${id} from database:`, error);
     throw new Error(`Failed to fetch player with ID ${id} from database`);
@@ -115,6 +146,15 @@ export async function getPlayerRatingHistory(playerId: string): Promise<{
  * @returns Promise resolving to array of tournaments
  */
 export async function getTournaments(): Promise<Tournament[]> {
+  // Check cache first
+  const cacheKey = generateCacheKey('tournaments', []);
+  const cachedResult = cache.get<Tournament[]>(cacheKey);
+  
+  if (cachedResult) {
+    console.log('Returning cached tournaments');
+    return cachedResult;
+  }
+
   try {
     const result = await query<Tournament>(`
       SELECT 
@@ -126,7 +166,7 @@ export async function getTournaments(): Promise<Tournament[]> {
     `);
     
     // Parse JSON fields and convert numeric fields
-    return result.rows.map(tournament => ({
+    const tournaments = result.rows.map(tournament => ({
       ...tournament,
       fieldAvgRating: typeof tournament.fieldAvgRating === 'string' ? 
         parseFloat(tournament.fieldAvgRating) : tournament.fieldAvgRating,
@@ -135,6 +175,11 @@ export async function getTournaments(): Promise<Tournament[]> {
       results: typeof tournament.results === 'string' ? JSON.parse(tournament.results) : tournament.results,
       participants: Array.isArray(tournament.participants) ? tournament.participants : []
     }));
+    
+    // Cache the result for 10 minutes
+    cache.set(cacheKey, tournaments, 10 * 60 * 1000);
+    
+    return tournaments;
   } catch (error) {
     console.error('Error fetching tournaments from database:', error);
     throw new Error('Failed to fetch tournaments from database');
@@ -147,6 +192,15 @@ export async function getTournaments(): Promise<Tournament[]> {
  * @returns Promise resolving to tournament or undefined if not found
  */
 export async function getTournamentById(id: string): Promise<Tournament | undefined> {
+  // Check cache first
+  const cacheKey = generateCacheKey('tournament', [id]);
+  const cachedResult = cache.get<Tournament>(cacheKey);
+  
+  if (cachedResult) {
+    console.log(`Returning cached tournament with ID: ${id}`);
+    return cachedResult;
+  }
+
   try {
     const result = await query<Tournament>(`
       SELECT 
@@ -158,13 +212,15 @@ export async function getTournamentById(id: string): Promise<Tournament | undefi
     `, [id]);
     
     if (result.rows.length === 0) {
+      // Cache the "not found" result to avoid repeated database queries
+      cache.set(cacheKey, null, 2 * 60 * 1000); // Cache not-found for 2 minutes
       return undefined;
     }
     
     const tournament = result.rows[0];
     
     // Parse JSON fields and convert numeric fields
-    return {
+    const tournamentResult = {
       ...tournament,
       fieldAvgRating: typeof tournament.fieldAvgRating === 'string' ? 
         parseFloat(tournament.fieldAvgRating) : tournament.fieldAvgRating,
@@ -173,6 +229,11 @@ export async function getTournamentById(id: string): Promise<Tournament | undefi
       results: typeof tournament.results === 'string' ? JSON.parse(tournament.results) : tournament.results,
       participants: Array.isArray(tournament.participants) ? tournament.participants : []
     };
+    
+    // Cache the result for 10 minutes
+    cache.set(cacheKey, tournamentResult, 10 * 60 * 1000);
+    
+    return tournamentResult;
   } catch (error) {
     console.error(`Error fetching tournament with ID ${id} from database:`, error);
     throw new Error(`Failed to fetch tournament with ID ${id} from database`);
@@ -287,11 +348,48 @@ export async function getUserDashboard(): Promise<{
   }
 }
 
+/**
+ * Clear player-related cache entries
+ * @param playerId Optional player ID to clear specific player cache
+ */
+export function clearPlayerCache(playerId?: string): void {
+  if (playerId) {
+    // Clear specific player cache
+    const playerCacheKey = generateCacheKey('player', [playerId]);
+    cache.delete(playerCacheKey);
+  } else {
+    // Clear all player-related cache
+    // This is a simple approach - in a real application, you'd want a more 
+    // sophisticated approach to clear specific cache keys based on patterns
+    cache.clear(); // For simplicity, clearing entire cache
+  }
+  
+  // Always clear the all-players cache since it might be affected
+  cache.delete(generateCacheKey('players', []));
+}
+
+/**
+ * Clear tournament-related cache entries
+ * @param tournamentId Optional tournament ID to clear specific tournament cache
+ */
+export function clearTournamentCache(tournamentId?: string): void {
+  if (tournamentId) {
+    // Clear specific tournament cache
+    const tournamentCacheKey = generateCacheKey('tournament', [tournamentId]);
+    cache.delete(tournamentCacheKey);
+  } else {
+    // Clear all tournament-related cache
+    cache.delete(generateCacheKey('tournaments', []));
+  }
+}
+
 export default {
   getPlayers,
   getPlayerById,
   getPlayerRatingHistory,
   getTournaments,
   getTournamentById,
-  getUserDashboard
+  getUserDashboard,
+  clearPlayerCache,
+  clearTournamentCache
 };

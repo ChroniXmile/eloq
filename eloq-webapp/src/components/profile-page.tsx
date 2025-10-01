@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardHeader,
@@ -24,7 +24,9 @@ interface ProfileFormState {
   email: string;
   avatarUrl: string;
   preferences: {
-    [key: string]: any;
+    emailNotifications?: boolean;
+    dashboardTheme?: 'light' | 'dark';
+    [key: string]: unknown;
   };
 }
 
@@ -42,54 +44,66 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Handle API response errors
+  const handleErrorResponse = async (response: Response) => {
+    if (response.status === 404) {
+      // User doesn't exist in our database, create a basic profile
+      setFormData({
+        displayName:
+          clerkUser?.fullName ||
+          clerkUser?.username ||
+          clerkUser?.primaryEmailAddress?.emailAddress ||
+          '',
+        email: clerkUser?.primaryEmailAddress?.emailAddress || '',
+        avatarUrl: clerkUser?.imageUrl || '',
+        preferences: {},
+      });
+    } else {
+      throw new Error('Failed to fetch user data');
+    }
+  };
+
+  // Handle successful API response
+  const handleSuccessResponse = async (response: Response) => {
+    const userData = await response.json();
+    setUser(userData);
+    setFormData({
+      displayName: userData.displayName || '',
+      email: userData.email || '',
+      avatarUrl: userData.avatarUrl || '',
+      preferences: userData.preferences || {},
+    });
+  };
+
+  // Fetch user data from our database
+  const fetchUserData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/profile');
+      
+      if (!response.ok) {
+        await handleErrorResponse(response);
+      } else {
+        await handleSuccessResponse(response);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setError('Failed to load profile data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [clerkUser, handleErrorResponse, handleSuccessResponse]);
+
   // Load user data once Clerk user is loaded
   useEffect(() => {
     if (isClerkLoaded && clerkUser) {
-      const fetchUserData = async () => {
-        try {
-          const response = await fetch('/api/profile');
-
-          if (!response.ok) {
-            if (response.status === 404) {
-              // User doesn't exist in our database, create a basic profile
-              setFormData({
-                displayName:
-                  clerkUser.fullName ||
-                  clerkUser.username ||
-                  clerkUser.primaryEmailAddress?.emailAddress ||
-                  '',
-                email: clerkUser.primaryEmailAddress?.emailAddress || '',
-                avatarUrl: clerkUser.imageUrl || '',
-                preferences: {},
-              });
-            } else {
-              throw new Error('Failed to fetch user data');
-            }
-          } else {
-            const userData = await response.json();
-            setUser(userData);
-            setFormData({
-              displayName: userData.displayName || '',
-              email: userData.email || '',
-              avatarUrl: userData.avatarUrl || '',
-              preferences: userData.preferences || {},
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-          setError('Failed to load profile data');
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
       fetchUserData();
     } else if (isClerkLoaded && !clerkUser) {
       // User is not authenticated
       setIsLoading(false);
       setError('You must be signed in to view this page');
     }
-  }, [isClerkLoaded, clerkUser]);
+  }, [isClerkLoaded, clerkUser, fetchUserData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -101,7 +115,7 @@ export default function ProfilePage() {
     }));
   };
 
-  const handlePreferenceChange = (key: string, value: any) => {
+  const handlePreferenceChange = (key: string, value: boolean | string | number) => {
     setFormData((prev) => ({
       ...prev,
       preferences: {
@@ -141,6 +155,41 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Error updating profile:', error);
       setError('Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Function to create a player from the profile data
+  const createPlayerFromProfile = async () => {
+    setIsSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch('/api/profile/create-player', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          displayName: formData.displayName,
+          email: formData.email,
+          avatarUrl: formData.avatarUrl,
+          preferences: formData.preferences,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create player');
+      }
+
+      const newPlayer = await response.json();
+      setSuccess(`Player "${newPlayer.name}" created successfully with ID: ${newPlayer.id}`);
+    } catch (error) {
+      console.error('Error creating player from profile:', error);
+      setError(error instanceof Error ? error.message : 'Failed to create player');
     } finally {
       setIsSaving(false);
     }
@@ -324,9 +373,18 @@ export default function ProfilePage() {
                 </div>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button type="submit" disabled={isSaving}>
+            <CardFooter className="flex flex-col sm:flex-row gap-2">
+              <Button type="submit" disabled={isSaving} className="w-full sm:w-auto">
                 {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+              <Button 
+                type="button" 
+                disabled={isSaving} 
+                variant="secondary"
+                className="w-full sm:w-auto"
+                onClick={createPlayerFromProfile}
+              >
+                {isSaving ? 'Processing...' : 'Create Player Profile'}
               </Button>
             </CardFooter>
           </form>

@@ -1,4 +1,4 @@
-import { fetchPlayerById } from "@/lib/data-connection";
+import { fetchPlayerById, fetchPlayerRatingHistory } from "@/lib/data-connection";
 import { PlayerDetails } from "@/components/player-details";
 import { Player } from "@/models/player";
 import { notFound } from "next/navigation";
@@ -14,8 +14,11 @@ export async function generateStaticParams() {
 export default async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
-  // Fetch player from the database
-  const player: Player | undefined = await fetchPlayerById(id);
+  // Fetch player and rating history from the database
+  const [player, ratingHistory] = await Promise.all([
+    fetchPlayerById(id),
+    fetchPlayerRatingHistory(id)
+  ]);
   
   // If player not found, return 404
   if (!player) {
@@ -24,7 +27,7 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="container py-8">
-      <PlayerDetails player={player} />
+      <PlayerDetails player={player} ratingHistory={ratingHistory} />
     </div>
   );
 }

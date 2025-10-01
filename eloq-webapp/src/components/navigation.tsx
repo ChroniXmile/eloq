@@ -6,6 +6,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { UserButton, useUser, useAuth } from '@clerk/nextjs';
 
 import {
   NavigationMenu,
@@ -28,7 +29,7 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
-import { Menu, User, Trophy, Users, Calendar, Home, ChevronDown } from 'lucide-react';
+import { Menu, User, Trophy, Users, Calendar, Home, ChevronDown, LogOut } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 const navigationItems = [
@@ -107,10 +108,7 @@ export function MainNavigation() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/avatars/user.jpg" alt="@eloquser" />
-                  <AvatarFallback>EU</AvatarFallback>
-                </Avatar>
+                <UserButton afterSignOutUrl="/" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -132,10 +130,15 @@ export function MainNavigation() {
                   <span>Settings</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/logout" className="cursor-pointer">
-                  <span>Log out</span>
-                </Link>
+              <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                // Sign out functionality will be handled by the UserButton, 
+                // but we include this as an additional logout option
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/sign-in';
+                }
+              }}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -182,10 +185,7 @@ export function MainNavigation() {
                 
                 <div className="mt-auto">
                   <div className="flex items-center space-x-3 rounded-lg px-4 py-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src="/avatars/user.jpg" alt="@eloquser" />
-                      <AvatarFallback>EU</AvatarFallback>
-                    </Avatar>
+                    <UserButton afterSignOutUrl="/" />
                     <div className="flex flex-col">
                       <span className="font-medium">Pool Player</span>
                       <span className="text-sm text-muted-foreground">eloq.user@example.com</span>
@@ -208,10 +208,18 @@ export function MainNavigation() {
                       <span>Theme</span>
                       <ThemeToggle />
                     </div>
-                    <Button variant="outline" className="w-full justify-start" asChild>
-                      <Link href="/logout">
-                        <span>Log out</span>
-                      </Link>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start" 
+                      onClick={() => {
+                        // Redirect to sign-in page which will handle the logout
+                        if (typeof window !== 'undefined') {
+                          window.location.href = '/elements/clerk/sign-in';
+                        }
+                      }}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
                     </Button>
                   </div>
                 </div>

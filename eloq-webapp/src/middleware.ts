@@ -4,8 +4,13 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/players(.*)',
   '/tournaments(.*)',
+  '/calendar(.*)',
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/sign-out(.*)',
+  '/profile(.*)',
+  '/data(.*)',
+  '/api(.*)', // Allow all API routes
   '/api/webhooks(.*)',
   '/elements/clerk/sign-in(.*)',
 ]);

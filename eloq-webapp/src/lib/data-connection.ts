@@ -88,11 +88,25 @@ export async function fetchPlayers(): Promise<Player[]> {
       return await databaseModules.getPlayers();
     } catch (error) {
       console.error('Error fetching players from database, falling back to mock data:', error);
+      // Fallback to mock data
+      try {
+        return mockDataService.getPlayers();
+      } catch (mockError) {
+        console.error('Error fetching mock players:', mockError);
+        // Return an empty array as the ultimate fallback
+        return [];
+      }
     }
   }
   
   // Fallback to mock data
-  return mockDataService.getPlayers();
+  try {
+    return mockDataService.getPlayers();
+  } catch (mockError) {
+    console.error('Error fetching mock players:', mockError);
+    // Return an empty array as the ultimate fallback
+    return [];
+  }
 }
 
 /**
@@ -112,7 +126,13 @@ export async function fetchPlayerById(id: string): Promise<Player | undefined> {
   }
   
   // Fallback to mock data
-  return mockDataService.getPlayerById(id);
+  try {
+    return mockDataService.getPlayerById(id);
+  } catch (mockError) {
+    console.error(`Error fetching mock player with ID ${id}:`, mockError);
+    // Return undefined as the ultimate fallback
+    return undefined;
+  }
 }
 
 /**
@@ -141,7 +161,13 @@ export async function fetchPlayerRatingHistory(playerId: string): Promise<{
   }
   
   // Fallback to mock data
-  return mockDataService.getPlayerRatingHistory(playerId);
+  try {
+    return mockDataService.getPlayerRatingHistory(playerId);
+  } catch (mockError) {
+    console.error(`Error fetching mock rating history for player with ID ${playerId}:`, mockError);
+    // Return an empty array as the ultimate fallback
+    return [];
+  }
 }
 
 /**
@@ -156,11 +182,25 @@ export async function fetchTournaments(): Promise<Tournament[]> {
       return await databaseModules.getTournaments();
     } catch (error) {
       console.error('Error fetching tournaments from database, falling back to mock data:', error);
+      // Fallback to mock data
+      try {
+        return mockDataService.getTournaments();
+      } catch (mockError) {
+        console.error('Error fetching mock tournaments:', mockError);
+        // Return an empty array as the ultimate fallback
+        return [];
+      }
     }
   }
   
   // Fallback to mock data
-  return mockDataService.getTournaments();
+  try {
+    return mockDataService.getTournaments();
+  } catch (mockError) {
+    console.error('Error fetching mock tournaments:', mockError);
+    // Return an empty array as the ultimate fallback
+    return [];
+  }
 }
 
 /**
@@ -180,7 +220,13 @@ export async function fetchTournamentById(id: string): Promise<Tournament | unde
   }
   
   // Fallback to mock data
-  return mockDataService.getTournamentById(id);
+  try {
+    return mockDataService.getTournamentById(id);
+  } catch (mockError) {
+    console.error(`Error fetching mock tournament with ID ${id}:`, mockError);
+    // Return undefined as the ultimate fallback
+    return undefined;
+  }
 }
 
 /**
@@ -205,11 +251,57 @@ export async function fetchUserDashboard(): Promise<{
       return await databaseModules.getUserDashboard();
     } catch (error) {
       console.error('Error fetching user dashboard from database, falling back to mock data:', error);
+      // Fallback to mock data
+      try {
+        return mockDataService.getUserDashboard();
+      } catch (mockError) {
+        console.error('Error fetching mock user dashboard:', mockError);
+        // Return a default dashboard as the ultimate fallback
+        return {
+          user: {
+            id: 'default',
+            username: 'guest',
+            email: 'guest@example.com',
+            displayName: 'Guest User',
+            avatarUrl: '',
+            favoritePlayers: [],
+            recentlyViewed: [],
+            preferences: {},
+            createdAt: new Date(),
+            lastLogin: new Date(),
+          },
+          favoritePlayers: [],
+          recentlyViewed: [],
+          upcomingTournaments: [],
+        };
+      }
     }
   }
   
   // Fallback to mock data
-  return mockDataService.getUserDashboard();
+  try {
+    return mockDataService.getUserDashboard();
+  } catch (mockError) {
+    console.error('Error fetching mock user dashboard:', mockError);
+    // Return a default dashboard as the ultimate fallback
+    return {
+      user: {
+        id: 'default',
+        username: 'guest',
+        email: 'guest@example.com',
+        displayName: 'Guest User',
+        avatarUrl: '',
+        favoritePlayers: [],
+        recentlyViewed: [],
+        preferences: {},
+        createdAt: new Date(),
+        lastLogin: new Date(),
+      },
+      favoritePlayers: [],
+      recentlyViewed: [],
+      upcomingTournaments: [],
+    };
+  }
 }
 
 /**

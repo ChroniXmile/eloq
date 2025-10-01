@@ -1,17 +1,23 @@
-import { PlayerRankingList } from "@/components/player-ranking-list";
-import { fetchPlayers } from "@/lib/data-connection";
-import { Player } from "@/models/player";
-import { 
-  Trophy, 
-  Users, 
-  Calendar, 
-  BarChart3,
-  TrendingUp
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { GradientDots } from "@/components/ui/gradient-dots";
-import Link from "next/link";
+import { PlayerRankingList } from '@/components/player-ranking-list';
+import { fetchPlayers } from '@/lib/data-connection';
+import { Player } from '@/models/player';
+import { Trophy, Users, Calendar, BarChart3, TrendingUp } from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { GradientDots } from '@/components/ui/gradient-dots';
+import { BentoCard, BentoGrid } from '@/components/ui/bento-grid';
+import { Globe } from '@/components/ui/globe';
+import { PlayerTournamentBeam } from '@/components/ui/player-tournament-beam';
+import CountUp from '@/components/CountUp';
+// import ProfileCard from '@/components/jazzycard';
+import ProfileCard from '@/components/jazzycard';
+import Link from 'next/link';
 
 export default async function Home() {
   // Fetch players from the database
@@ -19,26 +25,39 @@ export default async function Home() {
 
   // Get top players for featured section
   const topPlayers = players.slice(0, 5);
-  
+
   // Calculate some stats
   const totalPlayers = players.length;
-  const validRatedPlayers = players.filter(player => 
-    typeof player.rating === 'number' && !isNaN(player.rating)
+  const validRatedPlayers = players.filter(
+    (player) => typeof player.rating === 'number' && !isNaN(player.rating)
   );
-  const avgRating = validRatedPlayers.length > 0 
-    ? Math.round(validRatedPlayers.reduce((sum, player) => sum + player.rating, 0) / validRatedPlayers.length)
-    : 0;
-    
-  const validMatchPlayers = players.filter(player => 
-    typeof player.matchesPlayed === 'number' && !isNaN(player.matchesPlayed)
+  const avgRating =
+    validRatedPlayers.length > 0
+      ? Math.round(
+          validRatedPlayers.reduce((sum, player) => sum + player.rating, 0) /
+            validRatedPlayers.length
+        )
+      : 0;
+
+  const validMatchPlayers = players.filter(
+    (player) =>
+      typeof player.matchesPlayed === 'number' && !isNaN(player.matchesPlayed)
   );
-  const totalMatches = validMatchPlayers.reduce((sum, player) => sum + player.matchesPlayed, 0);
+  const totalMatches = validMatchPlayers.reduce(
+    (sum, player) => sum + player.matchesPlayed,
+    0
+  );
 
   return (
     <div className="space-y-8">
       {/* Hero Section */}
       <section className="text-center py-12 md:py-20 relative overflow-hidden">
-        <GradientDots className="-z-10 opacity-30" dotSize={2} spacing={30} duration={40} />
+        <GradientDots
+          className="-z-10 opacity-30"
+          dotSize={2}
+          spacing={30}
+          duration={40}
+        />
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
           Pool/Billiards <span className="text-primary">Rankings</span>
         </h1>
@@ -55,34 +74,129 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Bento Grid Section */}
+      <section className="py-8">
+        <BentoGrid className="max-w-none mx-auto px-4">
+          <BentoCard
+            name="Player Rankings"
+            className="md:col-span-2"
+            background={
+              <div className="absolute inset-0 rounded-xl transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
+                <PlayerTournamentBeam />
+              </div>
+            }
+            Icon={Trophy}
+            description="Track player rankings with our Elo-like rating system."
+            href="/players"
+            cta="View Rankings"
+          />
+          <BentoCard
+            name="Tournaments"
+            className="md:col-span-1"
+            background={
+              <div className="absolute inset-0 bg-gradient-to-r from-secondary/10 to-primary/10 rounded-xl" />
+            }
+            Icon={Calendar}
+            description="Browse upcoming tournaments and match results."
+            href="/tournaments"
+            cta="View Tournaments"
+          />
+          <BentoCard
+            name="Performance Stats"
+            className="md:col-span-1"
+            background={
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl" />
+            }
+            Icon={TrendingUp}
+            description={`🏆 Avg. Rating: ${avgRating} 📊`}
+            href="/profile"
+            cta="View Stats"
+          />
+          <BentoCard
+            name="Match History"
+            className="md:col-span-2"
+            background={
+              <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-gradient-to-r from-primary/10 to-secondary/10 transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
+                <div className="text-center">
+                  <div className="text-6xl font-bold text-primary">
+                    <CountUp
+                      to={totalMatches}
+                      duration={3}
+                      className="font-bold text-5xl md:text-6xl"
+                    />
+                  </div>
+                  <div className="text-lg text-primary/70 mt-2">
+                    Matches Played
+                  </div>
+                </div>
+              </div>
+            }
+            Icon={BarChart3}
+            description="Review your match history and performance trends."
+            href="/profile"
+            cta="View History"
+          />
+          <BentoCard
+            name="Community"
+            className="md:col-span-1"
+            background={
+              <div className="absolute inset-0 rounded-xl transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
+                <Globe className="size-full" />
+              </div>
+            }
+            Icon={Users}
+            description="Connect with other players in the pool community."
+            href="/players"
+            cta="Join Community"
+          />
+          <BentoCard
+            name="Leaderboards"
+            className="md:col-span-1"
+            background={
+              <div className="absolute inset-0 flex items-center justify-center p-4"></div>
+            }
+            Icon={TrendingUp}
+            description="See top performers in various categories."
+            href="/players"
+            cta="View Leaders"
+          />
+          <BentoCard
+            name="Tournament Calendar"
+            className="md:col-span-1"
+            background={
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl" />
+            }
+            Icon={Calendar}
+            description="Stay updated with upcoming events and schedules."
+            href="/calendar"
+            cta="View Calendar"
+          />
+        </BentoGrid>
+      </section>
+
       {/* Stats Overview */}
       <section>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Players</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Players
+              </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalPlayers}</div>
-              <p className="text-xs text-muted-foreground">Active in the system</p>
+              <p className="text-xs text-muted-foreground">
+                Active in the system
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Rating</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{avgRating}</div>
-              <p className="text-xs text-muted-foreground">Across all players</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Matches Played</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Matches Played
+              </CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -90,14 +204,16 @@ export default async function Home() {
               <p className="text-xs text-muted-foreground">Total this season</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Top Rated</CardTitle>
               <Trophy className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">#{topPlayers[0]?.ranking || 'N/A'}</div>
+              <div className="text-2xl font-bold">
+                #{topPlayers[0]?.ranking || 'N/A'}
+              </div>
               <p className="text-xs text-muted-foreground">
                 {topPlayers[0]?.name || 'No players'} leads
               </p>
@@ -114,10 +230,14 @@ export default async function Home() {
             <Link href="/players">View All →</Link>
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           {topPlayers.map((player) => (
-            <Link key={player.id} href={`/players/${player.id}`} className="block">
+            <Link
+              key={player.id}
+              href={`/players/${player.id}`}
+              className="block"
+            >
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardHeader className="flex flex-row items-center gap-4">
                   <div className="pool-ball-solid w-12 h-12 bg-primary text-primary-foreground flex items-center justify-center font-bold">
@@ -131,7 +251,9 @@ export default async function Home() {
                 <CardContent>
                   <div className="flex justify-between items-center">
                     <span className="text-2xl font-bold">{player.rating}</span>
-                    <span className={`text-lg font-semibold ${player.winRate && player.winRate >= 70 ? 'text-green-600' : player.winRate && player.winRate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <span
+                      className={`text-lg font-semibold ${player.winRate && player.winRate >= 70 ? 'text-green-600' : player.winRate && player.winRate >= 50 ? 'text-yellow-600' : 'text-red-600'}`}
+                    >
                       {player.winRate || 0}%
                     </span>
                   </div>
@@ -159,13 +281,14 @@ export default async function Home() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground mb-4">
-              Our Elo-like rating system tracks player performance across tournaments, 
-              adjusting ratings based on match outcomes, opponent strength, and other factors.
+              Our Elo-like rating system tracks player performance across
+              tournaments, adjusting ratings based on match outcomes, opponent
+              strength, and other factors.
             </p>
             <p className="text-muted-foreground">
-              Players start with a provisional rating and transition to established status 
-              after 30 matches. Ratings are updated after each match based on performance 
-              relative to expectations.
+              Players start with a provisional rating and transition to
+              established status after 30 matches. Ratings are updated after
+              each match based on performance relative to expectations.
             </p>
           </CardContent>
         </Card>
