@@ -28,8 +28,18 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/nextjs';
 
-import { Menu, User, Trophy, Users, Calendar, Home, ChevronDown, LogOut } from 'lucide-react';
+import {
+  Menu,
+  User,
+  Trophy,
+  Users,
+  Calendar,
+  Home,
+  ChevronDown,
+  LogOut,
+} from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 const navigationItems = [
@@ -70,7 +80,7 @@ export function MainNavigation() {
             </div>
             <span className="inline-block font-bold text-xl">ELOQ</span>
           </Link>
-          
+
           {/* Desktop Navigation */}
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
@@ -100,16 +110,29 @@ export function MainNavigation() {
           <Badge variant="secondary" className="hidden sm:flex">
             Admin
           </Badge>
-          
+
           {/* Theme toggle */}
           <ThemeToggle />
-          
+
           {/* User menu */}
+          <SignedOut>
+            <SignInButton />
+            <SignUpButton>
+              <button className="bg-[#6c47ff] text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
+                Sign Up
+              </button>
+            </SignUpButton>
+          </SignedOut>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <UserButton afterSignOutUrl="/" />
-              </Button>
+              <SignedIn>
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                >
+                  <UserButton afterSignOutUrl="/" />
+                </Button>
+              </SignedIn>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuItem asChild>
@@ -130,13 +153,16 @@ export function MainNavigation() {
                   <span>Settings</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={() => {
-                // Sign out functionality will be handled by the UserButton, 
-                // but we include this as an additional logout option
-                if (typeof window !== 'undefined') {
-                  window.location.href = '/sign-in';
-                }
-              }}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => {
+                  // Sign out functionality will be handled by the UserButton,
+                  // but we include this as an additional logout option
+                  if (typeof window !== 'undefined') {
+                    window.location.href = '/sign-in';
+                  }
+                }}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
@@ -162,7 +188,7 @@ export function MainNavigation() {
                   </div>
                   <span className="inline-block font-bold text-2xl">ELOQ</span>
                 </div>
-                
+
                 <nav className="flex flex-col space-y-2 py-6">
                   {navigationItems.map((item) => (
                     <Link
@@ -180,26 +206,36 @@ export function MainNavigation() {
                     </Link>
                   ))}
                 </nav>
-                
+
                 <Separator className="my-4" />
-                
+
                 <div className="mt-auto">
                   <div className="flex items-center space-x-3 rounded-lg px-4 py-3">
                     <UserButton afterSignOutUrl="/" />
                     <div className="flex flex-col">
                       <span className="font-medium">Pool Player</span>
-                      <span className="text-sm text-muted-foreground">eloq.user@example.com</span>
+                      <span className="text-sm text-muted-foreground">
+                        eloq.user@example.com
+                      </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col space-y-2 pt-4">
-                    <Button variant="outline" className="w-full justify-start" asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      asChild
+                    >
                       <Link href="/profile">
                         <User className="mr-2 h-4 w-4" />
                         Profile
                       </Link>
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      asChild
+                    >
                       <Link href="/settings">
                         <span>Settings</span>
                       </Link>
@@ -208,9 +244,9 @@ export function MainNavigation() {
                       <span>Theme</span>
                       <ThemeToggle />
                     </div>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start" 
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
                       onClick={() => {
                         // Redirect to sign-in page which will handle the logout
                         if (typeof window !== 'undefined') {

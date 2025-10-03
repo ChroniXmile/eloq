@@ -1,17 +1,18 @@
-import { SignIn } from "@clerk/nextjs";
+'use client';
 
-export default function SignInPage() {
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function SignInRedirect() {
+  useEffect(() => {
+    window.location.href = '/elements/clerk/sign-in';
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-[25rem] space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Sign In</h1>
-          <p className="text-muted-foreground">
-            Sign in to your account using Clerk's built-in component
-          </p>
-        </div>
-
-        <SignIn />
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p>Redirecting to sign in...</p>
       </div>
     </div>
   );

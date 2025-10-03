@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
@@ -45,10 +43,11 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState<string | null>(null);
 
   // Handle API response errors
-  const handleErrorResponse = async (response: Response) => {
+  const handleErrorResponse = useCallback(async (response: Response) => {
     if (response.status === 404) {
       // User doesn't exist in our database, create a basic profile
-      setFormData({
+      setFormData(prevFormData => ({
+        ...prevFormData,
         displayName:
           clerkUser?.fullName ||
           clerkUser?.username ||
@@ -57,14 +56,14 @@ export default function ProfilePage() {
         email: clerkUser?.primaryEmailAddress?.emailAddress || '',
         avatarUrl: clerkUser?.imageUrl || '',
         preferences: {},
-      });
+      }));
     } else {
       throw new Error('Failed to fetch user data');
     }
-  };
+  }, [clerkUser]);
 
   // Handle successful API response
-  const handleSuccessResponse = async (response: Response) => {
+  const handleSuccessResponse = useCallback(async (response: Response) => {
     const userData = await response.json();
     setUser(userData);
     setFormData({
@@ -73,7 +72,7 @@ export default function ProfilePage() {
       avatarUrl: userData.avatarUrl || '',
       preferences: userData.preferences || {},
     });
-  };
+  }, []);
 
   // Fetch user data from our database
   const fetchUserData = useCallback(async () => {
@@ -92,7 +91,7 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [clerkUser, handleErrorResponse, handleSuccessResponse]);
+  }, [handleErrorResponse, handleSuccessResponse]);
 
   // Load user data once Clerk user is loaded
   useEffect(() => {

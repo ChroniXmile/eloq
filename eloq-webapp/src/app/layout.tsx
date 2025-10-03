@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ClerkProvider } from '@clerk/nextjs';
 import { shadcn } from '@clerk/themes';
 import ErrorBoundary from '@/components/error-boundary';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

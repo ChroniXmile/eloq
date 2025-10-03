@@ -18,6 +18,9 @@ import CountUp from '@/components/CountUp';
 // import ProfileCard from '@/components/jazzycard';
 import ProfileCard from '@/components/jazzycard';
 import Link from 'next/link';
+import HomeHero from '@/components/home-hero';
+import { ConfettiName } from '@/components/ConfettiOver';
+import React from 'react';
 
 export default async function Home() {
   // Fetch players from the database
@@ -51,18 +54,10 @@ export default async function Home() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <section className="text-center py-12 md:py-20 relative overflow-hidden">
-        <GradientDots
-          className="-z-10 opacity-30"
-          dotSize={2}
-          spacing={30}
-          duration={40}
-        />
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-          Pool/Billiards <span className="text-primary">Rankings</span>
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-          Track player performance and rankings with our Elo-like rating system
+      <section className="text-center py-12 md:py-20 relative overflow-hidden bg-background">
+        <HomeHero />
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 mt-8">
+          Track player performance and ratings with our accurate ELO system
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button asChild size="lg">
@@ -141,7 +136,7 @@ export default async function Home() {
             className="md:col-span-1"
             background={
               <div className="absolute inset-0 rounded-xl transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
-                <Globe className="size-full" />
+                <Globe className="size-full accent-auto" />
               </div>
             }
             Icon={Users}
@@ -153,7 +148,9 @@ export default async function Home() {
             name="Leaderboards"
             className="md:col-span-1"
             background={
-              <div className="absolute inset-0 flex items-center justify-center p-4"></div>
+              <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-gradient-to-r from-primary/10 to-secondary/10 transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
+                <ConfettiName topPlayers={topPlayers} />
+              </div>
             }
             Icon={TrendingUp}
             description="See top performers in various categories."
@@ -188,34 +185,6 @@ export default async function Home() {
               <div className="text-2xl font-bold">{totalPlayers}</div>
               <p className="text-xs text-muted-foreground">
                 Active in the system
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Matches Played
-              </CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalMatches}</div>
-              <p className="text-xs text-muted-foreground">Total this season</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Top Rated</CardTitle>
-              <Trophy className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                #{topPlayers[0]?.ranking || 'N/A'}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {topPlayers[0]?.name || 'No players'} leads
               </p>
             </CardContent>
           </Card>

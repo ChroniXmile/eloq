@@ -3,10 +3,12 @@ import { auth } from '@clerk/nextjs/server';
 import { query } from '@/lib/db';
 import { Player } from '@/models/player';
 import { User } from '@/models/user';
+import { clearPlayerCache } from '@/lib/db/database-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = auth();
+    const authObject = await auth();
+    const { userId } = authObject;
     
     if (!userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -85,12 +87,8 @@ export async function POST(request: NextRequest) {
       ]
     );
 
-    // Clear any player-related cache
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/data/clear-cache`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'players' })
-    }).catch(() => {}); // Ignore errors when clearing cache
+    // Clear player cache to refresh the player list
+    clearPlayerCache(); // Clear all player cache entries
 
     return new Response(JSON.stringify(result.rows[0]), {
       status: 200,
