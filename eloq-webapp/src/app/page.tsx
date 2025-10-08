@@ -1,5 +1,5 @@
 import { PlayerRankingList } from '@/components/player-ranking-list';
-import { fetchPlayers } from '@/lib/data-connection';
+import { fetchPlayers, fetchTournaments } from '@/lib/data-connection';
 import { Player } from '@/models/player';
 import { Trophy, Users, Calendar, BarChart3, TrendingUp } from 'lucide-react';
 import {
@@ -15,16 +15,22 @@ import { BentoCard, BentoGrid } from '@/components/ui/bento-grid';
 import { Globe } from '@/components/ui/globe';
 import { PlayerTournamentBeam } from '@/components/ui/player-tournament-beam';
 import CountUp from '@/components/CountUp';
-// import ProfileCard from '@/components/jazzycard';
 import ProfileCard from '@/components/jazzycard';
 import Link from 'next/link';
 import HomeHero from '@/components/home-hero';
 import { ConfettiName } from '@/components/ConfettiOver';
+import { AnimatedList } from '@/components/ui/animated-list';
+import { SmallCalendar } from '@/components/ui/small-calendar';
 import React from 'react';
+import { cn } from '@/lib/utils';
+import { AnimatedListTournament } from '@/components/animated-tournament-list';
 
 export default async function Home() {
   // Fetch players from the database
   const players: Player[] = await fetchPlayers();
+
+  // Fetch tournaments from the database
+  // const tournaments: Tournament[] = await fetchTournaments();
 
   // Get top players for featured section
   const topPlayers = players.slice(0, 5);
@@ -76,7 +82,7 @@ export default async function Home() {
             name="Player Rankings"
             className="md:col-span-2"
             background={
-              <div className="absolute inset-0 rounded-xl transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
+              <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-gradient-to-r from-primary/10 to-secondary/10 transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
                 <PlayerTournamentBeam />
               </div>
             }
@@ -89,7 +95,17 @@ export default async function Home() {
             name="Tournaments"
             className="md:col-span-1"
             background={
-              <div className="absolute inset-0 bg-gradient-to-r from-secondary/10 to-primary/10 rounded-xl" />
+              <div className="absolute inset-0 bg-gradient-to-r from-secondary/10 to-primary/10 rounded-xl">
+                <div
+                  className={cn(
+                    'relative flex h-[500px] w-full flex-col overflow-hidden p-2'
+                  )}
+                >
+                  <AnimatedList>
+                    <AnimatedListTournament className="h-full" />
+                  </AnimatedList>
+                </div>
+              </div>
             }
             Icon={Calendar}
             description="Browse upcoming tournaments and match results."
@@ -135,7 +151,7 @@ export default async function Home() {
             name="Community"
             className="md:col-span-1"
             background={
-              <div className="absolute inset-0 rounded-xl transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
+              <div className="absolute inset-0 rounded-xl flex items-center justify-center bg-gradient-to-r from-primary/10 to-secondary/10 transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
                 <Globe className="size-full accent-auto" />
               </div>
             }
@@ -158,10 +174,12 @@ export default async function Home() {
             cta="View Leaders"
           />
           <BentoCard
-            name="Tournament Calendar"
+            name="Event Calendar"
             className="md:col-span-1"
             background={
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl flex items-center justify-center p-4 transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
+                <SmallCalendar className="h-full w-full" />
+              </div>
             }
             Icon={Calendar}
             description="Stay updated with upcoming events and schedules."
@@ -169,26 +187,6 @@ export default async function Home() {
             cta="View Calendar"
           />
         </BentoGrid>
-      </section>
-
-      {/* Stats Overview */}
-      <section>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Players
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalPlayers}</div>
-              <p className="text-xs text-muted-foreground">
-                Active in the system
-              </p>
-            </CardContent>
-          </Card>
-        </div>
       </section>
 
       {/* Featured Players */}

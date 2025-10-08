@@ -1,6 +1,30 @@
 {
   "cSpell.words": [
+    "codacy",
+    "ehthumbs",
     "ELOQ",
+    "htmlcov",
+    "kilocode",
+    "nosetests",
+    "pycache",
+    "pytest",
+    "qwen",
+    "sdist",
+    "trae",
+    "TRAE",
+    "vercel",
     "WCAG"
-  ]
+  ],
+  "trae.tab.enableRename": false,
+  "trae.tab.enableAutoImport": true,
+  "trae.advanced": {
+    "logLevel": "info",
+    "logFile": false,
+    "outOfScopeProcess": false,
+    "debounceInterval": 125,
+    "proxyMode": "system",
+    "proxyUrl": "",
+    "addToChatHint": true
+  },
+  "trae.chatLanguage": "en"
 }

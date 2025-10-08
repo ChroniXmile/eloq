@@ -9,17 +9,6 @@ import React from 'react';
 export default function HomeHero() {
   return (
     <div className="relative flex flex-col items-center justify-center">
-      {/* <div className="w-full absolute inset-0 h-full">
-        <SparklesCore
-          id="tsparticlesfullpage"
-          background="transparent"
-          minSize={0.6}
-          maxSize={1.4}
-          particleDensity={100}
-          className="w-full h-full"
-          particleColor="#FFFFFF"
-        />
-      </div> */}
       <motion.div
         className="relative mx-4 my-4 flex flex-col items-center justify-center gap-4 text-center sm:mx-0 sm:mb-0 sm:flex-row z-20"
         initial={{ opacity: 0, y: 20 }}
