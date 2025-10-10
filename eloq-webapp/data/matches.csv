@@ -1,0 +1,11 @@
+date,event_tier,format,discipline,balls_per_rack,race_to,player_i,player_j,racks_i,racks_j,balls_i,balls_j,field_avg
+2025-08-01,major,alternate,9-ball,9,9,John Smith,Emma Johnson,9,5,78,48,2050
+2025-08-01,major,alternate,9-ball,9,9,Michael Brown,Sarah Davis,9,7,90,72,2050
+2025-08-02,major,winner,9-ball,9,9,Emma Johnson,Michael Brown,9,8,85,78,2050
+2025-08-02,major,alternate,9-ball,9,9,John Smith,Sarah Davis,9,6,82,58,2050
+2025-08-03,major,alternate,9-ball,9,9,Sarah Davis,Emma Johnson,9,4,88,38,2050
+2025-08-03,major,winner,9-ball,9,9,Michael Brown,John Smith,8,9,75,85,2050
+2025-08-04,regional,alternate,9-ball,9,9,David Wilson,Player 15,9,7,85,68,1850
+2025-08-04,regional,winner,9-ball,9,9,Player 15,David Wilson,8,9,72,85,1850
+2025-08-05,regional,alternate,9-ball,9,9,Player 22,Player 33,9,6,81,58,1750
+2025-08-05,regional,winner,9-ball,9,9,Player 33,Player 22,9,8,88,75,1750

@@ -1,4 +1,4 @@
-# ELOQ Web Application
+# ELOQ - Pool/Billiards Rating System
 
 ELOQ is a modern pool/billiards score tracking and ranking website featuring an Elo-like rating system for player rankings.
 
@@ -6,25 +6,25 @@ ELOQ is a modern pool/billiards score tracking and ranking website featuring an 
 
 This project consists of two main components:
 
-1. A Python script (`pool_elo.py`) that implements the Elo-like rating algorithm for calculating player ratings based on match outcomes
-2. A Next.js web application that provides a sleek, responsive interface for viewing player rankings, player information, and tournament information
+1. A Python-based Elo-like rating system (`pool_elo.py`) that calculates player ratings based on match outcomes
+2. A Next.js web application (`eloq-webapp`) that provides a sleek, responsive interface for viewing player rankings and statistics
 
 ## Features
 
 ### Rating System
 
-The ELOQ rating system is based on the Elo rating system used in chess, adapted for pool/billiards with these key features:
+The ELOQ rating system is based on the Elo rating system used in chess, adapted specifically for pool/billiards with these advanced features:
 
 - **Rack-share Scoring**: Uses rack-share as the primary observed score
 - **Optional Balls-made Blending**: Supports optional blending with balls-made micro-score
 - **Race Length Scaling**: Scales rating updates by race length
-- **Event Strength Multipliers**: Applies multipliers based on event tier
+- **Event Strength Multipliers**: Applies multipliers based on event tier (local, regional, national, major)
 - **Format Offset**: Applies small rating offset for winner-break format
 - **Margin Dampening**: Uses logarithmic margin dampening
 - **K-factor Selection**: Implements uncertainty-aware K-factors
 - **Field Strength Adjustment**: Applies field strength multiplier based on average rating
 
-### Web Application Features
+### Web Application
 
 - **Player Rankings**: Top 100 players ranked by Elo-like rating system
 - **Player Profiles**: Detailed player information with statistics and rating history
@@ -37,18 +37,20 @@ The ELOQ rating system is based on the Elo rating system used in chess, adapted 
 
 ### Backend/Algorithm
 
-- Python 3
-- Pandas for data processing
+- Python 3 with pandas for data processing
 - Mathematical algorithms for Elo-like rating calculations
 
-### Web Application
+### Frontend
 
 - Next.js 15 with App Router
 - TypeScript
 - Tailwind CSS
 - shadcn/ui component library
 - React 19
-- PostgreSQL (planned, currently using mock data)
+
+### Database
+
+- PostgreSQL (with fallback to mock data for development)
 
 ## Getting Started
 
@@ -63,16 +65,22 @@ The ELOQ rating system is based on the Elo rating system used in chess, adapted 
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd eloq/eloq-webapp
+   cd eloq
    ```
 
-2. Install dependencies:
+2. Install Python dependencies:
    ```bash
+   pip3 install pandas
+   ```
+
+3. Install web application dependencies:
+   ```bash
+   cd eloq-webapp
    npm install
    ```
 
-3. Set up environment variables:
-   Create a `.env.local` file in the root of the project with the following variables:
+4. Set up environment variables:
+   Create a `.env.local` file in the `eloq-webapp` directory with the following variables:
    ```env
    DB_HOST=localhost
    DB_PORT=5432
@@ -85,6 +93,7 @@ The ELOQ rating system is based on the Elo rating system used in chess, adapted 
 
 1. Run the development server:
    ```bash
+   cd eloq-webapp
    npm run dev
    ```
 
@@ -94,26 +103,27 @@ The ELOQ rating system is based on the Elo rating system used in chess, adapted 
 
 The web application integrates with the Python rating system to calculate and display player ratings:
 
-1. **Match Data Collection**: Match results are collected and stored in `data/matches.csv`
+1. **Match Data Collection**: Match results are collected and stored in `eloq-webapp/data/matches.csv`
 2. **Rating Calculation**: The Python script (`pool_elo.py`) processes the match data to calculate updated player ratings
 3. **Rating Import**: The web application imports the calculated ratings into the database
 4. **Display**: The web application displays player ratings, rankings, and statistics
 
 To update player ratings:
 
-1. Prepare match data in `data/matches.csv`
+1. Prepare match data in `eloq-webapp/data/matches.csv`
 2. Run the rating calculation:
    ```bash
-   python3 ../pool_elo.py --matches data/matches.csv
+   python3 pool_elo.py --matches eloq-webapp/data/matches.csv
    ```
 3. Import the results into the database:
    ```bash
+   cd eloq-webapp
    npx tsx scripts/import-ratings.ts
    ```
 
 Or use the automated workflow:
 ```bash
-./../update-ratings.sh
+./update-ratings.sh
 ```
 
 ## Project Structure
@@ -122,6 +132,10 @@ Or use the automated workflow:
 eloq/
 ├── pool_elo.py                 # Python script implementing Elo-like rating algorithm
 ├── pool_rating_spec.md         # Specification for the rating system
+├── update-ratings.sh           # Automation script for rating updates
+├── run-rating-calculation.py  # Script to run Python rating engine
+├── demo-rating-update.sh       # Demonstration script
+├── run-complete-rating-update.sh # Complete workflow script
 ├── eloq-webapp/                # Next.js web application
 │   ├── package.json            # Project dependencies and scripts
 │   ├── src/
@@ -129,7 +143,8 @@ eloq/
 │   │   ├── components/         # Shared UI components
 │   │   ├── models/             # Data models (Player, Match, Tournament, User)
 │   │   ├── services/           # Business logic services
-│   │   └── lib/                # Utility libraries
+│   │   ├── lib/                # Utility libraries
+│   │   └── ...
 │   └── ...
 └── specs/                      # Feature specifications
     └── 001-i-am-building/
@@ -141,98 +156,13 @@ eloq/
         └── ...
 ```
 
-## Available Scripts
+## Documentation
 
-### Python Rating Script
-
-```bash
-python3 pool_elo.py --matches matches.csv --seeds seeds.csv
-# or without seeds
-python3 pool_elo.py --matches matches.csv
-```
-
-### Web Application Development
-
-```bash
-# Development
-npm run dev
-
-# Production build
-npm run build
-
-# Start production server
-npm run start
-
-# Linting
-npm run lint
-
-# Testing
-npm test
-npm run test:watch
-```
-
-## Data Models
-
-### Player
-
-- id: string (unique identifier)
-- name: string (player's full name)
-- rating: number (Elo-like rating)
-- ranking: number (current ranking from 1-100)
-- wins: number (total wins)
-- losses: number (total losses)
-- winRate: number (calculated win percentage)
-- avatarUrl: string (URL to player's avatar image)
-- joinDate: Date (date player joined)
-- lastPlayed: Date (date of last game)
-- country: string (player's country)
-- breaks: number (total century breaks)
-- highestBreak: number (highest score achieved)
-- description: string (brief bio)
-- matchesPlayed: number (total matches played)
-- provisional: boolean (true if < 30 matches)
-
-### Match
-
-- id: string (unique identifier)
-- date: Date (match date)
-- eventId: string (reference to tournament)
-- eventTier: enum (local, regional, national, major)
-- format: enum (alternate, winner)
-- discipline: string (e.g., 9-ball, 10-ball)
-- ballsPerRack: number (typical: 9, 10, 15)
-- raceTo: number (target for winner)
-- playerI: string (reference to player I)
-- playerJ: string (reference to player J)
-- racksI: number (racks won by player I)
-- racksJ: number (racks won by player J)
-- ballsI: number (balls pocketed by player I, optional)
-- ballsJ: number (balls pocketed by player J, optional)
-- fieldAvg: number (event field average rating, optional)
-
-## Development Guidelines
-
-### Code Style
-
-- TypeScript for the web application
-- ESLint and Prettier for code formatting
-- Follow Next.js and React best practices
-
-### Testing
-
-- Jest for unit tests
-- React Testing Library for component tests
-- Write tests for all new features
-- Maintain 80%+ test coverage
-
-### Rating Algorithm Implementation
-
-The web application implements the same rating calculation logic as the Python script:
-
-- Uses the same constants (SIGMA = 400, T0 = 9, etc.)
-- Implements the same formulas for expected score, race scaling, margin dampening
-- Applies the same K-factor selection based on player experience and rating
-- Supports the same optional features (balls-made blending, event strength multipliers)
+- `pool_rating_spec.md` - Complete specification for the Elo-like rating system
+- `INTEGRATION_SUMMARY.md` - Summary of how the Python rating system integrates with the web application
+- `INTEGRATION_OVERVIEW.md` - Detailed overview of the integration architecture
+- `RATING_SYSTEM_DOCS.md` - Documentation for the rating system
+- `eloq-webapp/src/app/documentation/page.tsx` - In-app documentation
 
 ## Contributing
 
