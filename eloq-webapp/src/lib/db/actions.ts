@@ -6,6 +6,7 @@
 import { initializeDataConnection } from '@/lib/data-connection';
 import { createTables, populateMockData } from '@/lib/db/init';
 import { query } from '.';
+import { clearTournamentCache } from './database-service';
 import { Player } from '@/models/player';
 import { Match } from '@/models/match';
 import { Tournament } from '@/models/tournament';
@@ -239,6 +240,7 @@ export async function importTournamentsFromCSV(csvData: any[]) {
     
     let importedCount = 0;
     let updatedCount = 0;
+    const touchedIds = new Set<string>();
     
     for (const row of csvData) {
       // Check if tournament already exists
@@ -293,7 +295,13 @@ export async function importTournamentsFromCSV(csvData: any[]) {
         );
         importedCount++;
       }
+
+      if (row.id) {
+        touchedIds.add(row.id);
+      }
     }
+
+    touchedIds.forEach((id) => clearTournamentCache(id));
     
     console.log(`Imported ${importedCount} new tournaments, updated ${updatedCount} existing tournaments`);
     return { 

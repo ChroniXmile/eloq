@@ -4,15 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   // Enable experimental features if needed
   experimental: {
-    // Enable Turbopack for faster builds
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
-      },
-    },
+    // Removed Turbopack to use standard webpack
   },
   // Configure TypeScript
   typescript: {

@@ -1,0 +1,121 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Align rating engines with 2025 Elo-like spec",
+        "description": "Update both the Python reference script and TypeScript services so the Elo-like calculations match the PRD’s 2025 constants and formulas.",
+        "details": "Touch points: `pool_elo.py`, `src/services/player-service.ts`, shared constants in `src/lib`. Replace K factors with 80/40/20, tier multipliers with 1.0/1.2/1.5/2.0, ensure race scaling, margin dampening, format offsets mirror the Python reference. Add a shared TypeScript module (e.g. `src/lib/rating/constants.ts`) consumed by client/server code to avoid drift. Pseudo-code:\n```\nconst K = matchesPlayed < 20 ? 80 : matchesPlayed <= 100 ? 40 : 20;\nconst tier = TIER_MULTIPLIERS[eventTier];\nconst raceScale = Math.sqrt(Math.max(totalRacks,1)/BASE_RACE);\nconst margin = Math.log1p(absRackDiff) / (1 + 10 ** (absRatingDiff / SIGMA));\nconst delta = blendedScore - expectedScore;\nreturn K * tier * raceScale * margin * delta;\n```\nUpdate `scripts/update-player-ratings.ts` so imported CSVs use the same constants. Refresh doc blocks to state the new thresholds.",
+        "testStrategy": "Expand `tests/unit/test-rating-calculation.test.ts` with fixtures covering provisional/established/elite players and every event tier; add cross-language parity test comparing outputs from `pool_elo.py` via snapshot CSV to the TS service. Run `npx jest` and CI lint.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Persist detailed rating events in PostgreSQL",
+        "description": "Introduce a normalized schema to store per-match rating deltas, factors, and audit data required for transparency.",
+        "details": "Create migration adding `player_rating_events` with fields: id, player_id FK, match_id FK, rating_before, rating_after, rating_change, expected_score, observed_score, blended_score, k_factor, race_factor, tier_multiplier, field_multiplier, margin_factor, balls_factor, created_at. Add supporting table `rating_event_factors` if optional features (balls-made) need separate storage. Update `scripts/import-ratings.ts` and `src/lib/db/import-python-ratings.ts` to read `pool_ratings_report.csv` from the Python run and batch insert rows inside a transaction. Extend `src/lib/db/database-service.ts` with helper methods `recordRatingEvents` and `getRatingEventsByPlayer`. Pseudo-code for import:\n```\nfor row in csv:\n  await client.query('INSERT ... ON CONFLICT DO UPDATE', mapCsv(row))\n```\nEnsure indexes on `player_id`, `match_id`, and `created_at` for fast history queries.",
+        "testStrategy": "Add integration tests under `tests/integration` using a temporary database to run the migration, import a small CSV, and assert persisted rows. Include contract tests ensuring the schema enforces FK and numeric ranges (e.g., rating_change within +/-200).",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Expose rating transparency APIs and exports",
+        "description": "Deliver API endpoints that surface per-match rating breakdowns and downloadable audit trails for players.",
+        "details": "Create `/api/players/[id]/rating-events` returning paginated rating events with filter params (e.g., `?limit=50&since=`). Include aggregation of contributing factors and computed explanations. Add `/api/players/[id]/rating-events/export` that streams CSV/JSON for downloads. Implement service in `src/lib/data-connection` to call new DB methods with caching + Clerk authorization (players can only export their own data unless admin). Use Next.js 15 Route Handlers with streaming for large datasets. Pseudo-code:\n```\nconst events = await ratingEventService.list(playerId, query);\nreturn Response.json({ events, meta });\n```\nHandle fallback to mock data gracefully when DB unavailable.",
+        "testStrategy": "Write contract tests in `tests/contract/test-get-player-rating-events.test.ts` to verify pagination, filtering, and HTTP 403 for unauthorized exports. Add performance guard ensuring 50 events return under 200ms using mocked DB client.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Upgrade player profile with transparent rating breakdown",
+        "description": "Enhance the player detail experience with real rating history, factor callouts, and export controls.",
+        "details": "Convert `PlayerDetails` to fetch rating events via server component loader and hydrate client charts with real data. Replace mock history generator with real timeline, add breakdown panel showing K-factor, expected score, race scaling, event multiplier, etc., for the latest matches. Provide toggles for rack-share vs blended score and a download button using the export endpoint. Ensure WCAG compliance (aria tables, keyboard). Pseudo-code:\n```\nconst [player, events] = await Promise.all([fetchPlayerById(), fetchRatingEvents()]);\nreturn <RatingTimeline data={events} />;\n```\nIntroduce reusable visualization components (stacked bars, accordions) using shadcn/Radix.",
+        "testStrategy": "Add React Testing Library tests to confirm factors render when events exist, skeleton states appear when loading, and download button calls correct endpoint. Include visual regression snapshot for the rating timeline. Run `npx jest`.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Discipline-filterable, real-time player rankings",
+        "description": "Rework the rankings list to support discipline filters, responsive pagination, and near real-time updates after match posts.",
+        "details": "Refactor `/players` page into a server component that loads rankings with query params (`discipline`, `tier`, `status`). Implement dropdown filters and persistent query in URL. Add incremental revalidation or subscription: hook a lightweight SSE/WebSocket client that listens for `ranking.updated` events published after rating recalculation to refresh data in place. Ensure the API `/api/players` accepts filters and returns fast-cached results. Pseudo-code:\n```\nconst discipline = searchParams.get('discipline') ?? 'all';\nconst players = await fetchPlayers({ discipline });\n```\nUse React 19 transitions for smooth filter updates.",
+        "testStrategy": "Integration test `tests/integration/test-view-rankings.test.tsx` to simulate selecting a discipline and assert filtered rows. Add unit test for `fetchPlayers` service ensuring SQL WHERE clause matches filter. Validate SSE handler with a mocked event emitter.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Tournament creation wizard and server actions",
+        "description": "Provide organizers with a guided flow to create tournaments, define format metadata, and register participants.",
+        "details": "Create `/tournaments/new` route using a multi-step form (metadata → format → participants → review) powered by `react-hook-form` + Zod validation. Server action `createTournament` writes to `tournaments` table, initializes empty bracket seeds, and emits an event for analytics. Integrate Clerk RBAC so only organizers/admins access. Pseudo-code:\n```\n'use server'\nexport async function createTournament(input) {\n  validate(input);\n  await db.tx(async tx => {\n    await tx.insert('tournaments', mapTournament(input));\n    await tx.insert('matches', seedBracket(input));\n  });\n}\n```\nUpdate admin dashboard shortcut to open the wizard.",
+        "testStrategy": "Write form validation unit tests and an integration test that posts mock data via server action in a test environment, asserting DB rows. Use Playwright (or RTL) to simulate the stepper and ensure accessibility roles are present.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Bracket generation service and viewer integration",
+        "description": "Generate and serve tournament brackets that feed the existing interactive bracket component in real time.",
+        "details": "Build `src/services/bracket-service.ts` to translate tournament participants + match seeds into single/double elimination structures and round-robin standings. Expose `/api/tournaments/[id]/bracket` returning `{ tournament, matches }` aligning with `TournamentBracketProps`. Update `TournamentDetails` page to fetch bracket payload and render `TournamentBracket`, passing admin handlers to POST to new endpoints for reporting scores/assigning tables. Precompute bracket positions on tournament creation and update when participants change. Pseudo-code:\n```\nconst { tournament, matches } = await bracketService.getBracket(tournamentId);\nreturn <TournamentBracket tournament={tournament} matches={matches} transport=\"ws\" />;\n```\n",
+        "testStrategy": "Add service unit tests covering single/double elimination seeding for 8/16 players. Contract tests for `/api/tournaments/:id/bracket` verifying JSON schema. Snapshot test for bracket component using mocked data.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Match result entry, validation, and rating pipeline",
+        "description": "Deliver organizer tooling to record match outcomes safely and trigger rating recalculations.",
+        "details": "Add organizer-only UI (modal or separate `/admin/matches`) that lists pending matches, validates rack totals, supports optional balls-made, and writes to `matches` table. Implement POST `/api/matches/[id]/report` updating match row, appending to `player_rating_events`, and enqueueing `updatePlayerRatings` job (reuse `src/lib/rating-coordinator`). Ensure audit trail (who edited, when) stored in a new `match_audits` table. For bulk updates, extend `/api/upload-csv` to schedule rating recalculation asynchronously. Pseudo-code:\n```\nawait db.tx(async tx => {\n  await tx.update('matches', ...);\n  await ratingEventsRepo.insert(tx, computeFactors(match));\n});\nqueue.ratingUpdate(match.tournamentId);\n```\n",
+        "testStrategy": "Integration tests hitting the new API with valid/invalid payloads to assert validation errors. Unit tests for `match-service` helpers ensuring rack-share math correct. Mock rating coordinator in tests to assert job enqueued without running subprocess.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Live tournament tracking and notifications",
+        "description": "Implement real-time updates for brackets, leaderboards, and spectator views with WebSocket/SSE infrastructure.",
+        "details": "Create `/api/live/tournaments/[id]` route handler using Next 15 WebSocket APIs that broadcasts match status updates, leaderboard deltas, and notifications when matches complete. Integrate with `TournamentBracket` via `transport=\"ws\"` prop, update spectator view to highlight live tables and push toast notifications using shadcn. Ensure fallback to polling when WebSocket unavailable. Publish events whenever matches update or rating recalculations finish. Pseudo-code:\n```\nconst ws = new WebSocket(url);\nws.onmessage = event => dispatch(updateTournament(JSON.parse(event.data)));\n```\nImplement rate limiting and auth (public spectator vs staff channel).",
+        "testStrategy": "Add server-side unit test mocking WebSocket server to ensure broadcast occurs on match update. Front-end test using RTL + mocked WebSocket to confirm UI reacts to incoming messages. Load-test with a script to validate 100 concurrent clients stay under 1s latency.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Personalized dashboard data and notification settings",
+        "description": "Replace placeholder dashboard content with real analytics, recent results, and user-managed alerts.",
+        "details": "Extend `getUserDashboard` to join new tables (rating events, matches, tournaments) and return recent matches, rating trends, upcoming events tied to favorites, and unread notification counts. Build preference UI under `/dashboard` allowing toggle for email/push alerts per event type, stored in `users.preferences`. Hook notification preferences into live tracking service (task 9) so alerts respect user choices. Pseudo-code:\n```\nconst dashboard = await fetchUserDashboard({ includeRecentMatches: true });\nreturn <DashboardFeed items={dashboard.recentMatches} prefs={dashboard.user.preferences} />;\n```\nEnsure GDPR compliance by honoring data export/delete via Clerk hooks.",
+        "testStrategy": "Add integration test covering `GET /api/dashboard` to verify data shape. Component tests ensuring dashboard renders recent matches when provided. Write unit test for preference toggle reducer. Run `npx jest`.",
+        "priority": "medium",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-10-13T20:29:47.476Z",
+      "updated": "2025-10-13T20:29:47.476Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

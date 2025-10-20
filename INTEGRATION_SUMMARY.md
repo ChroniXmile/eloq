@@ -7,26 +7,29 @@ I've successfully integrated the Python-based Elo-like rating system with the Ne
 ## Key Integration Components
 
 ### 1. Python Rating Engine (`pool_elo.py`)
+
 - Core rating calculation engine that processes match data and generates player ratings
 - Implements rack-share scoring with optional balls-made blending
 - Supports race length scaling, event strength multipliers, format offsets, and margin dampening
 - Uses uncertainty-aware K-factors and field strength adjustments
 
 ### 2. Web Application Integration Layer
+
 - Database service layer that interfaces with PostgreSQL
 - CSV import functionality to bring Python-generated ratings into the database
 - Mock data fallback system for development environments
 - Caching mechanism for improved performance
 
 ### 3. Automation Scripts
+
 - Shell scripts for orchestrating the complete rating update workflow
 - TypeScript scripts for database operations and data generation
 - API endpoints for programmatic access to rating updates
 
 ## Integration Workflow
 
-```
-Match Data (CSV) 
+```mermaid
+Match Data (CSV)
     ↓
 Python Rating Engine (pool_elo.py)
     ↓
@@ -42,12 +45,14 @@ Next.js Web Application
 ## Files Created/Modified
 
 ### Shell Scripts (Project Root)
+
 - `update-ratings.sh` - Main automation script
 - `run-rating-calculation.py` - Script to run Python rating engine
 - `demo-rating-update.sh` - Demonstration script
 - `run-complete-rating-update.sh` - Complete workflow script
 
 ### TypeScript Scripts (`eloq-webapp/scripts/`)
+
 - `import-ratings.ts` - Import Python CSV data into database
 - `update-player-ratings.ts` - Run complete rating update workflow
 - `generate-matches-data.ts` - Generate sample match data
@@ -55,15 +60,18 @@ Next.js Web Application
 - `generate-final-ratings.ts` - Generate properly formatted ratings CSV
 
 ### Database Integration (`eloq-webapp/src/lib/db/`)
+
 - `import-python-ratings.ts` - Import Python-generated CSV data into database
 - `rating-coordinator.ts` - Coordinate complete rating update process
 - Modified existing database service files to support rating updates
 
 ### Component Files (`eloq-webapp/src/components/`)
+
 - `admin/rating-update-button.tsx` - UI component to trigger rating updates
 - Updated player ranking components to display ratings correctly
 
 ### Model Files (`eloq-webapp/src/models/`)
+
 - Enhanced player model with rating attributes
 - Updated validation functions for rating data
 
@@ -114,6 +122,7 @@ npx tsx scripts/init-db-with-python-data.ts
 ### Data Models
 
 Player model now includes:
+
 - `rating`: Elo-like rating value
 - `ranking`: Position in overall rankings (1-100)
 - `wins/losses`: Win-loss record
@@ -126,6 +135,7 @@ Player model now includes:
 ### Rating Algorithm
 
 The integration preserves all features of the original Python algorithm:
+
 - Rack-share scoring (primary observed score)
 - Optional balls-made blending
 - Race length scaling (G_race = sqrt(T/T0))
@@ -138,6 +148,7 @@ The integration preserves all features of the original Python algorithm:
 ### Database Schema
 
 Players table includes all necessary fields for the rating system:
+
 - `rating`: DECIMAL(10, 2) for precise rating values
 - `ranking`: INTEGER for player rankings
 - `wins/losses`: INTEGER for win-loss record
@@ -158,6 +169,7 @@ Players table includes all necessary fields for the rating system:
 ## Testing
 
 The integration has been tested with:
+
 - Sample match data generation
 - Python rating calculation
 - CSV import into database

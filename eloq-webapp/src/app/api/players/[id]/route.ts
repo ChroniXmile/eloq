@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getPlayerById } from '@/lib/db/database-service';
+import { getLatestBackup } from '@/lib/db/backup-service';
 import { getPlayerById as getMockPlayerById } from '@/services/mock-data-service';
 
 export async function GET(
@@ -10,7 +11,29 @@ export async function GET(
     const player = await getPlayerById(params.id);
     
     if (!player) {
-      // Try mock data as fallback
+      // Try backup data as fallback
+      try {
+        const latestBackupPath = await getLatestBackup('./backups');
+        if (latestBackupPath) {
+          const fs = (await import('fs')).default;
+          const backupDataStr = fs.readFileSync(latestBackupPath, 'utf-8');
+          const backupData = JSON.parse(backupDataStr);
+          const backupPlayer = backupData.players.find((p: any) => p.id === params.id);
+          
+          if (backupPlayer) {
+            return new Response(JSON.stringify(backupPlayer), {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+          }
+        }
+      } catch (backupError) {
+        console.error('Error fetching player from backup:', backupError);
+      }
+      
+      // If backup fails, try mock data as fallback
       try {
         const mockPlayer = getMockPlayerById(params.id);
         if (mockPlayer) {
@@ -42,7 +65,29 @@ export async function GET(
   } catch (error) {
     console.error(`Error fetching player with ID ${params.id}:`, error);
     
-    // Fallback to mock data
+    // Fallback to backup data
+    try {
+      const latestBackupPath = await getLatestBackup('./backups');
+      if (latestBackupPath) {
+        const fs = (await import('fs')).default;
+        const backupDataStr = fs.readFileSync(latestBackupPath, 'utf-8');
+        const backupData = JSON.parse(backupDataStr);
+        const backupPlayer = backupData.players.find((p: any) => p.id === params.id);
+        
+        if (backupPlayer) {
+          return new Response(JSON.stringify(backupPlayer), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        }
+      }
+    } catch (backupError) {
+      console.error('Error fetching player from backup:', backupError);
+    }
+  
+    // If backup fails, fallback to mock data
     try {
       const mockPlayer = getMockPlayerById(params.id);
       if (mockPlayer) {

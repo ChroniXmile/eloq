@@ -1,0 +1,23 @@
+{
+  "projectName": "ELOQ",
+  "projectRoot": "/Users/industcomp/Developer/Projects/eloq",
+  "tasksDirectory": ".taskmaster/tasks",
+  "completedDirectory": ".taskmaster/completed",
+  "archivedDirectory": ".taskmaster/archived",
+  "defaultPriority": "medium",
+  "defaultStatus": "todo",
+  "tags": [
+    "frontend",
+    "backend",
+    "rating-system",
+    "ui",
+    "database",
+    "testing",
+    "documentation",
+    "bug",
+    "enhancement",
+    "refactor"
+  ],
+  "priorities": ["low", "medium", "high", "critical"],
+  "statuses": ["todo", "in-progress", "blocked", "review", "done"]
+}

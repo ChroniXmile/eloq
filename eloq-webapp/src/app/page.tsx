@@ -1,6 +1,7 @@
 import { PlayerRankingList } from '@/components/player-ranking-list';
 import { fetchPlayers, fetchTournaments } from '@/lib/data-connection';
 import { Player } from '@/models/player';
+import { Tournament } from '@/models/tournament';
 import { Trophy, Users, Calendar, BarChart3, TrendingUp } from 'lucide-react';
 import {
   Card,
@@ -29,8 +30,7 @@ export default async function Home() {
   // Fetch players from the database
   const players: Player[] = await fetchPlayers();
 
-  // Fetch tournaments from the database
-  // const tournaments: Tournament[] = await fetchTournaments();
+  const tournaments: Tournament[] = await fetchTournaments();
 
   // Get top players for featured section
   const topPlayers = players.slice(0, 5);
@@ -56,6 +56,49 @@ export default async function Home() {
     (sum, player) => sum + player.matchesPlayed,
     0
   );
+
+  const now = new Date();
+  const recentWindow = new Date(now);
+  recentWindow.setDate(now.getDate() - 7);
+
+  const upcomingEvents = tournaments.filter((tournament) => {
+    const rawDate = tournament.date instanceof Date ? tournament.date : new Date(tournament.date);
+    if (Number.isNaN(rawDate.getTime())) {
+      return false;
+    }
+
+    if (tournament.status === 'upcoming') {
+      return true;
+    }
+
+    if (tournament.status === 'ongoing') {
+      return rawDate >= recentWindow;
+    }
+
+    return false;
+  });
+
+  const calendarEvents = upcomingEvents
+    .slice()
+    .sort((a, b) => {
+      const aDate = a.date instanceof Date ? a.date : new Date(a.date);
+      const bDate = b.date instanceof Date ? b.date : new Date(b.date);
+      return aDate.getTime() - bDate.getTime();
+    })
+    .map((tournament) => {
+      const dateValue = tournament.date instanceof Date ? tournament.date : new Date(tournament.date);
+      const isAllDay = dateValue.getHours() === 0 && dateValue.getMinutes() === 0;
+      const timeLabel = isAllDay
+        ? 'All day'
+        : dateValue.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+      return {
+        date: dateValue.toISOString(),
+        title: tournament.name,
+        time: timeLabel,
+        location: tournament.location,
+      };
+    });
 
   return (
     <div className="space-y-8">
@@ -178,7 +221,7 @@ export default async function Home() {
             className="md:col-span-1"
             background={
               <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl flex items-center justify-center p-4 transition duration-500 ease-in-out transform hover:scale-105 hover:-translate-y-1">
-                <SmallCalendar className="h-full w-full" />
+                <SmallCalendar className="h-full w-full" events={calendarEvents} />
               </div>
             }
             Icon={Calendar}

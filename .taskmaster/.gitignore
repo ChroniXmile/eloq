@@ -1,0 +1,5 @@
+# Keep structure but ignore task files if needed
+# Uncomment to ignore all tasks:
+# tasks/
+# completed/
+# archived/

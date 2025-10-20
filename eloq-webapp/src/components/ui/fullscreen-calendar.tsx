@@ -28,20 +28,28 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useMediaQuery } from "@/hooks/use-media-query"
 
-interface Event {
-  id: number
+export interface CalendarEvent {
+  id: string
   name: string
   time: string
   datetime: string
+  location?: string
+  tier?: string
+  status?: string
+  prizePool?: number
+  description?: string
+  link?: string
+  fieldAvgRating?: number
 }
 
 interface CalendarData {
   day: Date
-  events: Event[]
+  events: CalendarEvent[]
 }
 
 interface FullScreenCalendarProps {
   data: CalendarData[]
+  onEventSelect?: (event: CalendarEvent) => void
 }
 
 const colStartClasses = [
@@ -54,7 +62,7 @@ const colStartClasses = [
   "col-start-7",
 ]
 
-export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
+export function FullScreenCalendar({ data, onEventSelect }: FullScreenCalendarProps) {
   const today = startOfToday()
   const [selectedDay, setSelectedDay] = React.useState(today)
   const [currentMonth, setCurrentMonth] = React.useState(
@@ -278,24 +286,23 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
                           .filter((event) => isSameDay(event.day, day))
                           .map((day) => (
                             <div key={day.day.toString()} className="space-y-1.5">
-                              {day.events.slice(0, 1).map((event) => (
-                                <div
+                              {day.events.map((event) => (
+                                <button
+                                  type="button"
                                   key={event.id}
-                                  className="flex flex-col items-start gap-1 rounded-lg border bg-muted/50 p-2 text-xs leading-tight"
+                                  onClick={() => onEventSelect?.(event)}
+                                  className="flex w-full flex-col items-start gap-1 rounded-lg border bg-muted/50 p-2 text-left text-xs leading-tight transition hover:border-muted-foreground/50 hover:bg-muted"
+                                  aria-label={`View details for ${event.name}`}
                                 >
                                   <p className="font-medium leading-none">
                                     {event.name}
                                   </p>
                                   <p className="leading-none text-muted-foreground">
                                     {event.time}
+                                    {event.location ? ` • ${event.location}` : ''}
                                   </p>
-                                </div>
+                                </button>
                               ))}
-                              {day.events.length > 1 && (
-                                <div className="text-xs text-muted-foreground">
-                                  + {day.events.length - 1} more
-                                </div>
-                              )}
                             </div>
                           ))}
                       </div>

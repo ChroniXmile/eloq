@@ -40,6 +40,7 @@ Next.js application that displays player ratings and provides a user interface f
 #### Database Integration
 
 Modified database service to:
+
 - Import player ratings from Python-generated CSV files
 - Update player rankings based on calculated ratings
 - Handle both new player creation and existing player updates
@@ -48,6 +49,7 @@ Modified database service to:
 #### API Endpoints
 
 Created API endpoints to:
+
 - Trigger rating updates via HTTP requests
 - Initialize database with Python-generated data
 - Provide programmatic access to rating system functionality

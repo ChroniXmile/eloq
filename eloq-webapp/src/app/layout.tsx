@@ -9,6 +9,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { shadcn } from '@clerk/themes';
 import ErrorBoundary from '@/components/error-boundary';
 import { AuroraBackground } from '@/components/ui/aurora-background';
+import FooterSection from '@/components/footer';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -55,21 +56,7 @@ export default async function RootLayout({
             <ErrorBoundary>
               <MainNavigation />
               <main className="container py-6 sm:py-8">{children}</main>
-              <footer className="border-t py-6 md:py-8">
-                <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
-                  <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-                    <div className="pool-table-bg w-8 h-8 rounded-full flex items-center justify-center">
-                      <Trophy className="h-5 w-5 text-white" />
-                    </div>
-                    <p className="text-center text-sm leading-loose md:text-left">
-                      Built with ❤️ for pool and billiards enthusiasts
-                    </p>
-                  </div>
-                  <p className="text-center text-sm text-muted-foreground md:text-right">
-                    © {new Date().getFullYear()} ELOQ. All rights reserved.
-                  </p>
-                </div>
-              </footer>
+              <FooterSection />
             </ErrorBoundary>
           </ThemeProvider>
         </body>

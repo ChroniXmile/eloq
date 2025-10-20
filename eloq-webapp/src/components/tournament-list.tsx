@@ -51,7 +51,7 @@ export function TournamentList({ tournaments, isLoading = false }: TournamentLis
     if (searchTerm) {
       filtered = filtered.filter(tournament => 
         tournament.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tournament.location.toLowerCase().includes(searchTerm.toLowerCase())
+        (tournament.location ?? '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     

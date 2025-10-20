@@ -6,15 +6,69 @@ import { addMonths, format, isSameMonth, isSameDay, startOfMonth, endOfMonth, ea
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+interface CalendarEvent {
+  date: string;
+  title?: string;
+  time?: string;
+  location?: string;
+}
 
 interface SmallCalendarProps {
   className?: string;
   date?: Date;
+  events?: CalendarEvent[];
   onDateSelect?: (date: Date) => void;
 }
 
-export function SmallCalendar({ className, date, onDateSelect }: SmallCalendarProps) {
+const serializeDateKey = (value: Date) => format(value, "yyyy-MM-dd");
+
+type NormalizedEvent = {
+  title: string;
+  time?: string;
+  location?: string;
+};
+
+export function SmallCalendar({ className, date, events = [], onDateSelect }: SmallCalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState<Date>(date || new Date());
+
+  const eventMap = React.useMemo(() => {
+    const map = new Map<string, NormalizedEvent[]>();
+
+    events.forEach((event) => {
+      if (!event?.date) {
+        return;
+      }
+
+      const parsed = new Date(event.date);
+      if (Number.isNaN(parsed.getTime())) {
+        return;
+      }
+
+      const key = serializeDateKey(parsed);
+      const label = event.time
+        ? event.time
+        : parsed.getHours() === 0 && parsed.getMinutes() === 0
+        ? "All day"
+        : parsed.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+      const normalized: NormalizedEvent = {
+        title: event.title ?? "Scheduled Event",
+        time: label,
+        location: event.location,
+      };
+
+      const existing = map.get(key);
+      if (existing) {
+        existing.push(normalized);
+      } else {
+        map.set(key, [normalized]);
+      }
+    });
+
+    return map;
+  }, [events]);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -92,23 +146,70 @@ export function SmallCalendar({ className, date, onDateSelect }: SmallCalendarPr
         {weeks.flat().map((day, index) => {
           const isCurrentMonth = isSameMonth(day, currentMonth);
           const isCurrentDay = isToday(day);
-          
-          return (
+          const key = serializeDateKey(day);
+          const dayEvents = day.getDate() !== 0 ? eventMap.get(key) : undefined;
+          const hasEvents = !!dayEvents && dayEvents.length > 0;
+          const eventCount = hasEvents ? dayEvents.length : 0;
+
+          const cell = (
             <div
-              key={index}
               onClick={() => day.getDate() !== 0 && onDateSelect && onDateSelect(day)}
               className={cn(
                 "h-5 flex items-center justify-center text-[0.6rem]",
                 day.getDate() !== 0 && "cursor-pointer hover:bg-accent rounded-sm",
                 isCurrentDay && "bg-primary text-primary-foreground rounded-sm",
-                !isCurrentMonth && "text-muted-foreground opacity-50"
+                !isCurrentMonth && "text-muted-foreground opacity-50",
+                hasEvents && !isCurrentDay && "relative"
               )}
+              aria-label={
+                day.getDate() !== 0
+                  ? `${format(day, "MMMM d, yyyy")}${hasEvents ? ` • ${eventCount} event${eventCount > 1 ? "s" : ""}` : ""}`
+                  : undefined
+              }
             >
               {day.getDate() !== 0 && (
-                <span className={isCurrentDay ? "text-primary-foreground" : ""}>
+                <span className={cn("relative", isCurrentDay ? "text-primary-foreground" : "") }>
                   {format(day, "d")}
+                  {hasEvents && !isCurrentDay && (
+                    <span
+                      aria-hidden
+                      className="absolute inset-x-0 -bottom-1 m-auto h-0.5 w-3 rounded bg-primary"
+                    />
+                  )}
                 </span>
               )}
+            </div>
+          );
+
+          if (hasEvents) {
+            return (
+              <Tooltip key={index}>
+                <TooltipTrigger asChild>{cell}</TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px] space-y-1 text-left">
+                  {dayEvents?.map((event, eventIndex) => (
+                    <div key={`${key}-${eventIndex}`} className="space-y-0.5">
+                      <p className="text-xs font-semibold leading-none text-background">{event.title}</p>
+                      {event.time && (
+                        <p className="text-[0.65rem] uppercase tracking-wide leading-none text-background/80">
+                          {event.time}
+                          {event.location ? ` • ${event.location}` : ''}
+                        </p>
+                      )}
+                      {!event.time && event.location && (
+                        <p className="text-[0.65rem] uppercase tracking-wide leading-none text-background/80">
+                          {event.location}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
+
+          return (
+            <div key={index}>
+              {cell}
             </div>
           );
         })}
@@ -116,5 +217,3 @@ export function SmallCalendar({ className, date, onDateSelect }: SmallCalendarPr
     </div>
   );
 }
-
-export { SmallCalendar };
