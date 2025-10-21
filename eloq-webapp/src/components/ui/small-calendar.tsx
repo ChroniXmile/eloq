@@ -1,12 +1,25 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { addMonths, format, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, isToday } from "date-fns";
+import * as React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  addMonths,
+  format,
+  isSameMonth,
+  isSameDay,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isToday,
+} from 'date-fns';
 
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface CalendarEvent {
   date: string;
@@ -22,7 +35,7 @@ interface SmallCalendarProps {
   onDateSelect?: (date: Date) => void;
 }
 
-const serializeDateKey = (value: Date) => format(value, "yyyy-MM-dd");
+const serializeDateKey = (value: Date) => format(value, 'yyyy-MM-dd');
 
 type NormalizedEvent = {
   title: string;
@@ -30,8 +43,15 @@ type NormalizedEvent = {
   location?: string;
 };
 
-export function SmallCalendar({ className, date, events = [], onDateSelect }: SmallCalendarProps) {
-  const [currentMonth, setCurrentMonth] = React.useState<Date>(date || new Date());
+export function SmallCalendar({
+  className,
+  date,
+  events = [],
+  onDateSelect,
+}: SmallCalendarProps) {
+  const [currentMonth, setCurrentMonth] = React.useState<Date>(
+    date || new Date()
+  );
 
   const eventMap = React.useMemo(() => {
     const map = new Map<string, NormalizedEvent[]>();
@@ -50,11 +70,14 @@ export function SmallCalendar({ className, date, events = [], onDateSelect }: Sm
       const label = event.time
         ? event.time
         : parsed.getHours() === 0 && parsed.getMinutes() === 0
-        ? "All day"
-        : parsed.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+          ? 'All day'
+          : parsed.toLocaleTimeString([], {
+              hour: 'numeric',
+              minute: '2-digit',
+            });
 
       const normalized: NormalizedEvent = {
-        title: event.title ?? "Scheduled Event",
+        title: event.title ?? 'Scheduled Event',
         time: label,
         location: event.location,
       };
@@ -85,7 +108,7 @@ export function SmallCalendar({ className, date, events = [], onDateSelect }: Sm
 
   daysInMonth.forEach((day, index) => {
     week.push(day);
-    
+
     if (week.length === 7 || index === daysInMonth.length - 1) {
       // Fill remaining slots with empty cells if needed
       while (week.length < 7) {
@@ -97,43 +120,45 @@ export function SmallCalendar({ className, date, events = [], onDateSelect }: Sm
   });
 
   const handlePreviousMonth = () => {
-    setCurrentMonth(prev => addMonths(prev, -1));
+    setCurrentMonth((prev) => addMonths(prev, -1));
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth(prev => addMonths(prev, 1));
+    setCurrentMonth((prev) => addMonths(prev, 1));
   };
 
   return (
-    <div className={cn("p-2", className)}>
+    <div className={cn('p-2', className)}>
       <div className="flex items-center justify-between mb-1">
         <button
+          title="Previous"
           onClick={handlePreviousMonth}
           className={cn(
-            buttonVariants({ variant: "ghost", size: "sm" }),
-            "h-6 w-6 p-0 opacity-50 hover:opacity-100"
+            buttonVariants({ variant: 'ghost', size: 'sm' }),
+            'h-6 w-6 p-0 opacity-50 hover:opacity-100'
           )}
         >
           <ChevronLeft className="h-3 w-3" />
         </button>
         <span className="text-xs font-semibold">
-          {format(currentMonth, "MMM yyyy")}
+          {format(currentMonth, 'MMM yyyy')}
         </span>
         <button
+          title="Next"
           onClick={handleNextMonth}
           className={cn(
-            buttonVariants({ variant: "ghost", size: "sm" }),
-            "h-6 w-6 p-0 opacity-50 hover:opacity-100"
+            buttonVariants({ variant: 'ghost', size: 'sm' }),
+            'h-6 w-6 p-0 opacity-50 hover:opacity-100'
           )}
         >
           <ChevronRight className="h-3 w-3" />
         </button>
       </div>
-      
+
       <div className="grid grid-cols-7 gap-px">
-        {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
-          <div 
-            key={index} 
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+          <div
+            key={index}
             className="text-[0.6rem] h-4 flex items-center justify-center text-muted-foreground font-medium"
           >
             {day}
@@ -141,7 +166,7 @@ export function SmallCalendar({ className, date, events = [], onDateSelect }: Sm
         ))}
       </div>
       <div className="border-t border-muted mt-1 mb-1"></div>
-      
+
       <div className="grid grid-cols-7 gap-px">
         {weeks.flat().map((day, index) => {
           const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -153,23 +178,31 @@ export function SmallCalendar({ className, date, events = [], onDateSelect }: Sm
 
           const cell = (
             <div
-              onClick={() => day.getDate() !== 0 && onDateSelect && onDateSelect(day)}
+              onClick={() =>
+                day.getDate() !== 0 && onDateSelect && onDateSelect(day)
+              }
               className={cn(
-                "h-5 flex items-center justify-center text-[0.6rem]",
-                day.getDate() !== 0 && "cursor-pointer hover:bg-accent rounded-sm",
-                isCurrentDay && "bg-primary text-primary-foreground rounded-sm",
-                !isCurrentMonth && "text-muted-foreground opacity-50",
-                hasEvents && !isCurrentDay && "relative"
+                'h-5 flex items-center justify-center text-[0.6rem]',
+                day.getDate() !== 0 &&
+                  'cursor-pointer hover:bg-accent rounded-sm',
+                isCurrentDay && 'bg-primary text-primary-foreground rounded-sm',
+                !isCurrentMonth && 'text-muted-foreground opacity-50',
+                hasEvents && !isCurrentDay && 'relative'
               )}
               aria-label={
                 day.getDate() !== 0
-                  ? `${format(day, "MMMM d, yyyy")}${hasEvents ? ` • ${eventCount} event${eventCount > 1 ? "s" : ""}` : ""}`
+                  ? `${format(day, 'MMMM d, yyyy')}${hasEvents ? ` • ${eventCount} event${eventCount > 1 ? 's' : ''}` : ''}`
                   : undefined
               }
             >
               {day.getDate() !== 0 && (
-                <span className={cn("relative", isCurrentDay ? "text-primary-foreground" : "") }>
-                  {format(day, "d")}
+                <span
+                  className={cn(
+                    'relative',
+                    isCurrentDay ? 'text-primary-foreground' : ''
+                  )}
+                >
+                  {format(day, 'd')}
                   {hasEvents && !isCurrentDay && (
                     <span
                       aria-hidden
@@ -185,10 +218,15 @@ export function SmallCalendar({ className, date, events = [], onDateSelect }: Sm
             return (
               <Tooltip key={index}>
                 <TooltipTrigger asChild>{cell}</TooltipTrigger>
-                <TooltipContent side="top" className="max-w-[220px] space-y-1 text-left">
+                <TooltipContent
+                  side="top"
+                  className="max-w-[220px] space-y-1 text-left"
+                >
                   {dayEvents?.map((event, eventIndex) => (
                     <div key={`${key}-${eventIndex}`} className="space-y-0.5">
-                      <p className="text-xs font-semibold leading-none text-background">{event.title}</p>
+                      <p className="text-xs font-semibold leading-none text-background">
+                        {event.title}
+                      </p>
                       {event.time && (
                         <p className="text-[0.65rem] uppercase tracking-wide leading-none text-background/80">
                           {event.time}
@@ -207,11 +245,7 @@ export function SmallCalendar({ className, date, events = [], onDateSelect }: Sm
             );
           }
 
-          return (
-            <div key={index}>
-              {cell}
-            </div>
-          );
+          return <div key={index}>{cell}</div>;
         })}
       </div>
     </div>

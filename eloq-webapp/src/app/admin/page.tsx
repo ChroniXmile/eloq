@@ -1,16 +1,44 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from 'react';
 import { initializeDatabase } from '@/lib/db/actions';
 import { TournamentStatus, TournamentTier } from '@/models/tournament';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertCircle,
@@ -87,15 +115,21 @@ const STATUS_OPTIONS: { label: string; value: TournamentStatus }[] = [
 ];
 
 const STATUS_STYLES: Record<TournamentStatus, string> = {
-  upcoming: 'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-900 dark:bg-blue-900/30 dark:text-blue-200',
-  ongoing: 'border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-900 dark:bg-amber-900/30 dark:text-amber-200',
-  completed: 'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200',
+  upcoming:
+    'border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-900 dark:bg-blue-900/30 dark:text-blue-200',
+  ongoing:
+    'border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-900 dark:bg-amber-900/30 dark:text-amber-200',
+  completed:
+    'border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200',
 };
 
 const TIER_STYLES: Record<TournamentTier, string> = {
-  local: 'border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-900 dark:bg-slate-900/30 dark:text-slate-200',
-  regional: 'border-teal-200 bg-teal-100 text-teal-700 dark:border-teal-900 dark:bg-teal-900/30 dark:text-teal-200',
-  national: 'border-purple-200 bg-purple-100 text-purple-700 dark:border-purple-900 dark:bg-purple-900/30 dark:text-purple-200',
+  local:
+    'border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-900 dark:bg-slate-900/30 dark:text-slate-200',
+  regional:
+    'border-teal-200 bg-teal-100 text-teal-700 dark:border-teal-900 dark:bg-teal-900/30 dark:text-teal-200',
+  national:
+    'border-purple-200 bg-purple-100 text-purple-700 dark:border-purple-900 dark:bg-purple-900/30 dark:text-purple-200',
   major: 'border-primary/30 bg-primary/10 text-primary dark:border-primary/50',
 };
 
@@ -154,8 +188,16 @@ const createInitialFormState = (): TournamentFormState => ({
 });
 
 export default function AdminPage() {
-  const [connectionResult, setConnectionResult] = useState<{ success: boolean; message: string; error?: string } | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<{ success?: boolean; message?: string; error?: string } | null>(null);
+  const [connectionResult, setConnectionResult] = useState<{
+    success: boolean;
+    message: string;
+    error?: string;
+  } | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<{
+    success?: boolean;
+    message?: string;
+    error?: string;
+  } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dataTypeRef = useRef<string>('');
@@ -163,12 +205,20 @@ export default function AdminPage() {
   const [tournaments, setTournaments] = useState<TournamentRecord[]>([]);
   const [isFetchingTournaments, setIsFetchingTournaments] = useState(true);
   const [tournamentError, setTournamentError] = useState<string | null>(null);
-  const [tournamentMessage, setTournamentMessage] = useState<MessageState | null>(null);
-  const [activeFilter, setActiveFilter] = useState<TournamentFilter>('upcoming');
-  const [tournamentDialogMode, setTournamentDialogMode] = useState<'create' | 'edit' | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<TournamentRecord | null>(null);
+  const [tournamentMessage, setTournamentMessage] =
+    useState<MessageState | null>(null);
+  const [activeFilter, setActiveFilter] =
+    useState<TournamentFilter>('upcoming');
+  const [tournamentDialogMode, setTournamentDialogMode] = useState<
+    'create' | 'edit' | null
+  >(null);
+  const [deleteTarget, setDeleteTarget] = useState<TournamentRecord | null>(
+    null
+  );
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formState, setFormState] = useState<TournamentFormState>(() => createInitialFormState());
+  const [formState, setFormState] = useState<TournamentFormState>(() =>
+    createInitialFormState()
+  );
   const [isSavingTournament, setIsSavingTournament] = useState(false);
   const [isDeletingTournament, setIsDeletingTournament] = useState(false);
 
@@ -207,7 +257,9 @@ export default function AdminPage() {
           fieldAvgRating: Number(entry.fieldAvgRating ?? 0),
           description: entry.description ?? '',
         }))
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        .sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
 
       setTournaments(normalised);
     } catch (error) {
@@ -309,7 +361,9 @@ export default function AdminPage() {
       tier: record.tier,
       status: record.status,
       prizePool: record.prizePool ? record.prizePool.toString() : '',
-      fieldAvgRating: record.fieldAvgRating ? record.fieldAvgRating.toString() : '',
+      fieldAvgRating: record.fieldAvgRating
+        ? record.fieldAvgRating.toString()
+        : '',
       description: record.description,
     });
     setTournamentDialogMode('edit');
@@ -322,7 +376,9 @@ export default function AdminPage() {
     setFormState(createInitialFormState());
   };
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = event.target;
     setFormState((previous) => ({ ...previous, [name]: value }));
   };
@@ -334,7 +390,10 @@ export default function AdminPage() {
     try {
       const date = new Date(formState.dateTime);
       if (Number.isNaN(date.getTime())) {
-        setTournamentMessage({ type: 'error', text: 'Please provide a valid date and time.' });
+        setTournamentMessage({
+          type: 'error',
+          text: 'Please provide a valid date and time.',
+        });
         setIsSavingTournament(false);
         return;
       }
@@ -368,7 +427,9 @@ export default function AdminPage() {
         }
       }
 
-      const endpoint = editingId ? `/api/tournaments/${editingId}` : '/api/tournaments';
+      const endpoint = editingId
+        ? `/api/tournaments/${editingId}`
+        : '/api/tournaments';
       const method = editingId ? 'PUT' : 'POST';
 
       const response = await fetch(endpoint, {
@@ -389,7 +450,9 @@ export default function AdminPage() {
 
       setTournamentMessage({
         type: 'success',
-        text: editingId ? 'Tournament updated successfully.' : 'Tournament created successfully.',
+        text: editingId
+          ? 'Tournament updated successfully.'
+          : 'Tournament created successfully.',
       });
 
       closeTournamentDialog();
@@ -413,7 +476,9 @@ export default function AdminPage() {
         method: 'DELETE',
       });
 
-      const result = await response.json().catch(() => ({ success: response.ok }));
+      const result = await response
+        .json()
+        .catch(() => ({ success: response.ok }));
 
       if (!response.ok) {
         const message = Array.isArray(result?.errors)
@@ -423,7 +488,10 @@ export default function AdminPage() {
         return;
       }
 
-      setTournamentMessage({ type: 'success', text: 'Tournament deleted successfully.' });
+      setTournamentMessage({
+        type: 'success',
+        text: 'Tournament deleted successfully.',
+      });
       setDeleteTarget(null);
       await loadTournaments();
     } catch (error) {
@@ -438,7 +506,9 @@ export default function AdminPage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold">Administration Dashboard</h1>
-          <p className="mt-2 text-muted-foreground">Manage database operations, imports, and tournaments</p>
+          <p className="mt-2 text-muted-foreground">
+            Manage database operations, imports, and tournaments
+          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -448,26 +518,46 @@ export default function AdminPage() {
                 <Database className="h-5 w-5" />
                 Database Connection
               </CardTitle>
-              <CardDescription>Verify your PostgreSQL connectivity</CardDescription>
+              <CardDescription>
+                Verify your PostgreSQL connectivity
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {connectionResult ? (
-                <Alert variant={connectionResult.success ? 'default' : 'destructive'}>
+                <Alert
+                  variant={connectionResult.success ? 'default' : 'destructive'}
+                >
                   <AlertTitle className="flex items-center gap-2">
-                    {connectionResult.success ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-                    {connectionResult.success ? 'Connected Successfully' : 'Connection Failed'}
+                    {connectionResult.success ? (
+                      <CheckCircle className="h-4 w-4" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4" />
+                    )}
+                    {connectionResult.success
+                      ? 'Connected Successfully'
+                      : 'Connection Failed'}
                   </AlertTitle>
                   <AlertDescription>
                     {connectionResult.message}
-                    {connectionResult.error && <span className="mt-1 block text-xs">{connectionResult.error}</span>}
+                    {connectionResult.error && (
+                      <span className="mt-1 block text-xs">
+                        {connectionResult.error}
+                      </span>
+                    )}
                   </AlertDescription>
                 </Alert>
               ) : (
-                <div className="py-6 text-center text-sm text-muted-foreground">Run a quick test to confirm connectivity.</div>
+                <div className="py-6 text-center text-sm text-muted-foreground">
+                  Run a quick test to confirm connectivity.
+                </div>
               )}
             </CardContent>
             <CardFooter>
-              <Button onClick={handleTestConnection} className="w-full" variant={connectionResult?.success ? 'secondary' : 'default'}>
+              <Button
+                onClick={handleTestConnection}
+                className="w-full"
+                variant={connectionResult?.success ? 'secondary' : 'default'}
+              >
                 {connectionResult?.success ? 'Test Again' : 'Test Connection'}
               </Button>
             </CardFooter>
@@ -479,19 +569,26 @@ export default function AdminPage() {
                 <Database className="h-5 w-5" />
                 Initialize Database
               </CardTitle>
-              <CardDescription>Create tables and seed mock data</CardDescription>
+              <CardDescription>
+                Create tables and seed mock data
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                This operation prepares the schema and inserts sample records for immediate exploration.
+                This operation prepares the schema and inserts sample records
+                for immediate exploration.
               </p>
             </CardContent>
             <CardFooter>
-              <form action={initializeDatabase} className="w-full">
-                <Button type="submit" className="w-full">
-                  Initialize Database
-                </Button>
-              </form>
+              <Button
+                onClick={async () => {
+                  const result = await initializeDatabase();
+                  setConnectionResult(result);
+                }}
+                className="w-full"
+              >
+                Initialize Database
+              </Button>
             </CardFooter>
           </Card>
         </div>
@@ -502,13 +599,18 @@ export default function AdminPage() {
               <Upload className="h-5 w-5" />
               CSV Imports
             </CardTitle>
-            <CardDescription>Upload player, match, or tournament data</CardDescription>
+            <CardDescription>
+              Upload player, match, or tournament data
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 md:grid-cols-3">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="flex h-full flex-col items-center gap-2 py-6">
+                  <Button
+                    variant="outline"
+                    className="flex h-full flex-col items-center gap-2 py-6"
+                  >
                     <Users className="h-8 w-8" />
                     Players
                   </Button>
@@ -517,8 +619,10 @@ export default function AdminPage() {
                   <DialogHeader>
                     <DialogTitle>Upload Players CSV</DialogTitle>
                     <DialogDescription>
-                      Expected columns: id, name, rating, ranking, wins, losses, win_rate, avatar_url, join_date, last_played, country,
-                      breaks, highest_break, description, matches_played, provisional.
+                      Expected columns: id, name, rating, ranking, wins, losses,
+                      win_rate, avatar_url, join_date, last_played, country,
+                      breaks, highest_break, description, matches_played,
+                      provisional.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
@@ -541,7 +645,10 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={() => handleFileSelect('players')} disabled={isUploading}>
+                    <Button
+                      onClick={() => handleFileSelect('players')}
+                      disabled={isUploading}
+                    >
                       {isUploading ? 'Uploading...' : 'Upload'}
                     </Button>
                   </DialogFooter>
@@ -550,7 +657,10 @@ export default function AdminPage() {
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="flex h-full flex-col items-center gap-2 py-6">
+                  <Button
+                    variant="outline"
+                    className="flex h-full flex-col items-center gap-2 py-6"
+                  >
                     <Trophy className="h-8 w-8" />
                     Matches
                   </Button>
@@ -559,7 +669,8 @@ export default function AdminPage() {
                   <DialogHeader>
                     <DialogTitle>Upload Matches CSV</DialogTitle>
                     <DialogDescription>
-                      Expected columns: id, date, event_id, event_tier, format, discipline, balls_per_rack, race_to, player_i, player_j,
+                      Expected columns: id, date, event_id, event_tier, format,
+                      discipline, balls_per_rack, race_to, player_i, player_j,
                       racks_i, racks_j, balls_i, balls_j, field_avg.
                     </DialogDescription>
                   </DialogHeader>
@@ -583,7 +694,10 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={() => handleFileSelect('matches')} disabled={isUploading}>
+                    <Button
+                      onClick={() => handleFileSelect('matches')}
+                      disabled={isUploading}
+                    >
                       {isUploading ? 'Uploading...' : 'Upload'}
                     </Button>
                   </DialogFooter>
@@ -592,7 +706,10 @@ export default function AdminPage() {
 
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="flex h-full flex-col items-center gap-2 py-6">
+                  <Button
+                    variant="outline"
+                    className="flex h-full flex-col items-center gap-2 py-6"
+                  >
                     <Calendar className="h-8 w-8" />
                     Tournaments
                   </Button>
@@ -601,7 +718,8 @@ export default function AdminPage() {
                   <DialogHeader>
                     <DialogTitle>Upload Tournaments CSV</DialogTitle>
                     <DialogDescription>
-                      Expected columns: id, name, date, location, prize_pool, tier, field_avg_rating, participants, results, status,
+                      Expected columns: id, name, date, location, prize_pool,
+                      tier, field_avg_rating, participants, results, status,
                       description.
                     </DialogDescription>
                   </DialogHeader>
@@ -625,7 +743,10 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button onClick={() => handleFileSelect('tournaments')} disabled={isUploading}>
+                    <Button
+                      onClick={() => handleFileSelect('tournaments')}
+                      disabled={isUploading}
+                    >
                       {isUploading ? 'Uploading...' : 'Upload'}
                     </Button>
                   </DialogFooter>
@@ -636,17 +757,31 @@ export default function AdminPage() {
             {uploadStatus && (
               <Alert variant={uploadStatus.success ? 'default' : 'destructive'}>
                 <AlertTitle className="flex items-center gap-2">
-                  {uploadStatus.success ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+                  {uploadStatus.success ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
                   {uploadStatus.success ? 'Upload Successful' : 'Upload Failed'}
                 </AlertTitle>
                 <AlertDescription>
                   {uploadStatus.message}
-                  {uploadStatus.error && <span className="mt-1 block text-xs">{uploadStatus.error}</span>}
+                  {uploadStatus.error && (
+                    <span className="mt-1 block text-xs">
+                      {uploadStatus.error}
+                    </span>
+                  )}
                 </AlertDescription>
               </Alert>
             )}
           </CardContent>
-          <input type="file" ref={fileInputRef} className="hidden" accept=".csv" />
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept=".csv"
+            aria-label="CSV file upload"
+          />
         </Card>
 
         <Card>
@@ -655,7 +790,9 @@ export default function AdminPage() {
               <FileText className="h-5 w-5" />
               Tournament Management
             </CardTitle>
-            <CardDescription>Create, edit, and remove tournament listings</CardDescription>
+            <CardDescription>
+              Create, edit, and remove tournament listings
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -664,24 +801,41 @@ export default function AdminPage() {
                   <Button
                     key={option.value}
                     size="sm"
-                    variant={activeFilter === option.value ? 'default' : 'outline'}
+                    variant={
+                      activeFilter === option.value ? 'default' : 'outline'
+                    }
                     onClick={() => setActiveFilter(option.value)}
                   >
                     {option.label}
                   </Button>
                 ))}
               </div>
-              <Button onClick={openCreateDialog} className="w-full gap-2 sm:w-auto">
+              <Button
+                onClick={openCreateDialog}
+                className="w-full gap-2 sm:w-auto"
+              >
                 <PlusCircle className="h-4 w-4" />
                 New Tournament
               </Button>
             </div>
 
             {tournamentMessage && (
-              <Alert variant={tournamentMessage.type === 'success' ? 'default' : 'destructive'}>
+              <Alert
+                variant={
+                  tournamentMessage.type === 'success'
+                    ? 'default'
+                    : 'destructive'
+                }
+              >
                 <AlertTitle className="flex items-center gap-2">
-                  {tournamentMessage.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />} 
-                  {tournamentMessage.type === 'success' ? 'Success' : 'Attention'}
+                  {tournamentMessage.type === 'success' ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  {tournamentMessage.type === 'success'
+                    ? 'Success'
+                    : 'Attention'}
                 </AlertTitle>
                 <AlertDescription>{tournamentMessage.text}</AlertDescription>
               </Alert>
@@ -723,27 +877,42 @@ export default function AdminPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredTournaments.map((entry) => (
-                      <TableRow key={entry.id} data-testid={`admin-tournament-${entry.id}`}>
+                      <TableRow
+                        key={entry.id}
+                        data-testid={`admin-tournament-${entry.id}`}
+                      >
                         <TableCell>
-                          <div className="font-medium capitalize">{entry.name}</div>
+                          <div className="font-medium capitalize">
+                            {entry.name}
+                          </div>
                           {entry.description && (
-                            <div className="text-xs text-muted-foreground line-clamp-1">{entry.description}</div>
+                            <div className="text-xs text-muted-foreground line-clamp-1">
+                              {entry.description}
+                            </div>
                           )}
                         </TableCell>
                         <TableCell>{formatDisplayDate(entry.date)}</TableCell>
                         <TableCell>{entry.location || '—'}</TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={`capitalize ${TIER_STYLES[entry.tier]}`}>
+                          <Badge
+                            variant="outline"
+                            className={`capitalize ${TIER_STYLES[entry.tier]}`}
+                          >
                             {entry.tier}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={`capitalize ${STATUS_STYLES[entry.status]}`}>
+                          <Badge
+                            variant="outline"
+                            className={`capitalize ${STATUS_STYLES[entry.status]}`}
+                          >
                             {entry.status}
                           </Badge>
                         </TableCell>
                         <TableCell>{formatCurrency(entry.prizePool)}</TableCell>
-                        <TableCell>{formatRating(entry.fieldAvgRating)}</TableCell>
+                        <TableCell>
+                          {formatRating(entry.fieldAvgRating)}
+                        </TableCell>
                         <TableCell>
                           <div className="flex justify-end gap-2">
                             <Button
@@ -773,14 +942,21 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Dialog open={tournamentDialogMode !== null} onOpenChange={(open) => (open ? null : closeTournamentDialog())}>
+        <Dialog
+          open={tournamentDialogMode !== null}
+          onOpenChange={(open) => (open ? null : closeTournamentDialog())}
+        >
           <DialogContent className="max-w-2xl">
             <form onSubmit={handleSubmitTournament} className="space-y-6">
               <DialogHeader>
                 <DialogTitle>
-                  {tournamentDialogMode === 'edit' ? 'Edit Tournament' : 'Create Tournament'}
+                  {tournamentDialogMode === 'edit'
+                    ? 'Edit Tournament'
+                    : 'Create Tournament'}
                 </DialogTitle>
-                <DialogDescription>Provide tournament details to keep schedules accurate.</DialogDescription>
+                <DialogDescription>
+                  Provide tournament details to keep schedules accurate.
+                </DialogDescription>
               </DialogHeader>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -820,7 +996,12 @@ export default function AdminPage() {
                   <Label>Tier</Label>
                   <Select
                     value={formState.tier}
-                    onValueChange={(value) => setFormState((previous) => ({ ...previous, tier: value as TournamentTier }))}
+                    onValueChange={(value) =>
+                      setFormState((previous) => ({
+                        ...previous,
+                        tier: value as TournamentTier,
+                      }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select tier" />
@@ -838,7 +1019,12 @@ export default function AdminPage() {
                   <Label>Status</Label>
                   <Select
                     value={formState.status}
-                    onValueChange={(value) => setFormState((previous) => ({ ...previous, status: value as TournamentStatus }))}
+                    onValueChange={(value) =>
+                      setFormState((previous) => ({
+                        ...previous,
+                        status: value as TournamentStatus,
+                      }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
@@ -888,34 +1074,51 @@ export default function AdminPage() {
               </div>
 
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={closeTournamentDialog}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeTournamentDialog}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isSavingTournament}>
                   {isSavingTournament
                     ? 'Saving...'
                     : tournamentDialogMode === 'edit'
-                    ? 'Save Changes'
-                    : 'Create Tournament'}
+                      ? 'Save Changes'
+                      : 'Create Tournament'}
                 </Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
 
-        <Dialog open={deleteTarget !== null} onOpenChange={(open) => (open ? null : setDeleteTarget(null))}>
+        <Dialog
+          open={deleteTarget !== null}
+          onOpenChange={(open) => (open ? null : setDeleteTarget(null))}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Delete Tournament</DialogTitle>
               <DialogDescription>
-                {deleteTarget ? `This will remove ${deleteTarget.name} from listings and calendars.` : 'Confirm deletion.'}
+                {deleteTarget
+                  ? `This will remove ${deleteTarget.name} from listings and calendars.`
+                  : 'Confirm deletion.'}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setDeleteTarget(null)}
+              >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleDeleteTournament} disabled={isDeletingTournament}>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteTournament}
+                disabled={isDeletingTournament}
+              >
                 {isDeletingTournament ? 'Removing...' : 'Delete'}
               </Button>
             </DialogFooter>
